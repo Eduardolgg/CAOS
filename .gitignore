@@ -31,3 +31,9 @@
 # Debug files
 *.dSYM/
 *.su
+
+# Meson files and directories
+build
+
+# Vim files
+*.swp
