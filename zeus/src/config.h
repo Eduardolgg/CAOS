@@ -37,6 +37,12 @@
 #define USE_COLORS
 /*#undef USE_COLRS*/
 
+/*
+ * Runlevel info.
+ */
+#define RUNLEVEL_NONE 'N'
+#define RUNLEVEL_START 'S'
+
 #define RCX_DIR "/etc/rcX.d"
 #ifndef develop
 	#define RCX_BUFFER_LEN 11
