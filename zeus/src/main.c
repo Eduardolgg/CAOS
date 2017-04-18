@@ -32,6 +32,7 @@
 
 #define SET_RUNLEVEL_INFO(prev, act) act = getenv("RUNLEVEL"); \
                                      prev = getenv("PREVLEVEL")
+#define IS_SYS_BOOT(prev, act) prev[0] == RUNLEVEL_NONE && act[0] == RUNLEVEL_START
 
 void print_usage(char *app_name) {
 	print_text_msg_ln(CAOS_BANNER);
@@ -40,72 +41,33 @@ void print_usage(char *app_name) {
 	exit(1);
 }
 
-/*
- * Return init scripts directory.
- * This methos use malloc to allocate the returned value, you must free it
- * in your code.
- * 
- * Returns a pointer to scripts directory path, NULL is code is unknown.
- */
-char *get_script_directory(char code)
-{
-	char *script_dir = (char *) malloc((sizeof (char*)) * RCX_BUFFER_LEN);
-
-	switch (code) {
-	case 'S':
-		PRINT_APP_INFO;
-	case '0':
-	case '1':
-	case '2':
-	case '3':
-	case '4':
-	case '5':
-	case '6':
-		strcpy(script_dir, RCX_DIR);
-		script_dir[7] = code;
-		break;
-	/* Objetivo tests */
-	#ifdef develop
-	case 'T':
-		strcpy(script_dir, "../tests/fake_init.d");
-		break;
-	#endif
-	default:
-		free(script_dir);
-		script_dir = NULL;
-	}
-
-	return script_dir;
-}
 
 int main(int argc, char **argv)
 {
 	int init_errors;
-	char *script_dir;
 	char *prev_runlevel; /* Previous runlevel */
 	char *act_runlevel;  /* Actual or new runlevel */
 
 	if (argc != 2)
 		print_usage(argv[0]);
 
-	if ((script_dir = get_script_directory(argv[1][0])) == NULL)
-		print_usage(argv[0]);
-
 	SET_RUNLEVEL_INFO(prev_runlevel, act_runlevel);
-	if (prev_runlevel == NULL || act_runlevel == NULL) {
+
+	if (act_runlevel == NULL || prev_runlevel == NULL) {
 		print_err_msg_ln("You must perform the change of runlevel from init, see init (8)");
-		goto exit;
+		print_usage(argv[0]);
     }
 
-	print_inf_msg_ln("Swiching from runlevel[%s] to runlevel[%s]", 
-	    prev_runlevel, act_runlevel);
-	
-	init_errors = serial_start(script_dir, act_runlevel[0], prev_runlevel[0]);
-	if (init_errors != 0) {
-		print_err_msg_ln("Error(s) detected, see log");
-	}
+	if (IS_SYS_BOOT(prev_runlevel, act_runlevel))
+		PRINT_APP_INFO;
 
-exit:
-	free(script_dir);
+	print_inf_msg_ln("%s: swiching from runlevel[%s] to runlevel[%s]", 
+	    argv[0], prev_runlevel, act_runlevel);
+	
+	init_errors = serial_start(act_runlevel[0], prev_runlevel[0]);
+
+	if (init_errors != 0)
+		print_err_msg_ln("Error(s) detected, see log");
+
 	return 0;
 }

@@ -75,19 +75,19 @@ void fork_and_exec_script(char *script_name)
 /*
  * Serial start of dirname init scripts.
  */
-int serial_start(char *act_dirname, char act_runlevel, 
-	char *prev_dirname, char prev_runlevel)
+int serial_start(char act_runlevel, char prev_runlevel)
 {
 	struct dirent **start_script_list;
+	char *dirname;
 	int n, i;
 
+	dirname = get_script_directory(act_runlevel);
 	switch(prev_runlevel) {
-	case 'N': 
+	case RUNLEVEL_NONE: 
 		n = get_start_init_scripts(dirname, &start_script_list);
 		break;
 	default:
-		n = get_change_init_scripts(dirname, &start_script_list);
-		
+		n = get_change_init_scripts(act_runlevel, prev_runlevel, &start_script_list);
 	}
 
 	if (n < 0) {
@@ -98,7 +98,7 @@ int serial_start(char *act_dirname, char act_runlevel,
 	chdir(dirname);
 	for (i = 0; i < n; i++) {
 		fork_and_exec_script(start_script_list[i]->d_name);
-		free(start_script_list[n]);
+		free(start_script_list[i]);
 	}
 	free(start_script_list);
 	return 0;

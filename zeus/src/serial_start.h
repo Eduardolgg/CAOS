@@ -24,5 +24,4 @@
 /*
  * Serial start of dirname init scripts.
  */
-int serial_start(char *act_dirname, char act_runlevel, 
-	char *prev_dirname, char prev_runlevel);
+int serial_start(char act_runlevel, char prev_runlevel);
