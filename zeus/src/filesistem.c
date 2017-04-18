@@ -31,7 +31,7 @@
  */
 int boot_select(const struct dirent *var)
 {
-	return (var->d_name)[0] == 'S';
+	return IS_START_SCRIPT(var);
 }
 
 /*
@@ -41,5 +41,17 @@ int boot_select(const struct dirent *var)
  */
 int change_runlevel_select(const struct dirent *var)
 {
-	return (var->d_name)[0] == 'S' || (var->d_name)[0] == 'K';
+	return IS_START_STOP_SCRIPT(var);
 }
+
+int list_contains_script(struct dirent **script_list, int list_len, char *script)
+{
+	int i;
+	for (i = 0; i < n; i++) {
+		
+		if(MATCH_START_STOP_SCRIPT_NAME(script_list[i], script)) {
+			return 1;
+	}
+	return 0;
+}	
+

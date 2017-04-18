@@ -54,9 +54,9 @@
  * Message macros. Please don't use uppercase macros in code,
  * create new like print_text_msg, etc.
  */
-#define PRINT_MSG_GENERIC(msg, lineEnd, color, ...) printf("%s", color); \
-                                                    printf(msg, ##__VA_ARGS__); \
-                                                    printf("%s%s", C_RESET, lineEnd);
+#define PRINT_MSG_GENERIC(msg, lineEnd, color, ...) { printf("%s", color); \
+                                                      printf(msg, ##__VA_ARGS__); \
+                                                      printf("%s%s", C_RESET, lineEnd); }
 
 #define PRINT_MSG(msg, color, ...) PRINT_MSG_GENERIC(msg, "", color, ##__VA_ARGS__);
 #define PRINT_MSG_LN(msg, color, ...) PRINT_MSG_GENERIC(msg, "\n", color, ##__VA_ARGS__);
@@ -77,11 +77,11 @@
 #define print_err_msg_ln(msg, ...) PRINT_MSG_LN(msg, C_RED, ##__VA_ARGS__);
 
 #define print_current_error() PRINT_MSG_LN(strerror(errno), C_RED);
-#define print_current_error_msg(msg, ...) PRINT_MSG(msg, C_RED, ##__VA_ARGS__); \
-                                      PRINT_MSG_LN(strerror(errno), C_RED);
+#define print_current_error_msg(msg, ...) { PRINT_MSG(msg, C_RED, ##__VA_ARGS__); \
+                                      PRINT_MSG_LN(strerror(errno), C_RED); }
 /*
  * Print CAOS init suite information
  */
-#define PRINT_APP_INFO	print_inf_msg_ln("System is boot up ");  \
-                      	print_text_msg_ln(CAOS_BANNER)
+#define PRINT_APP_INFO	{ print_inf_msg_ln("System is boot up ");  \
+                      	print_text_msg_ln(CAOS_BANNER); }
 

@@ -23,6 +23,15 @@
 
 #include <dirent.h>
 
+#define START_STOP_PREFIX_SIZE 3
+#define IS_START_SCRIPT(dirent) (dirent->d_name)[0] == 'S'
+#define IS_STOP_SCRIPT(dirent) (dirent->d_name)[0] == 'K'
+#define IS_START_STOP_SCRIPT(dirent) IS_START_SCRIPT(dirent) || \
+                                     IS_STOP_SCRIPT(dirent)
+#define MATCH_SCRIPT_TYPE(a,b) a[0] == b[0]
+#define MATCH_START_STOP_SCRIPT_NAME(dirent, char_name) strcmp((dirent->d_name) + START_STOP_PREFIX_SIZE, char_name) == 0
+
+
 /*
  * Alias for scandir getting only the S "start" scripts from
  * dir directory. See scandir(3).
