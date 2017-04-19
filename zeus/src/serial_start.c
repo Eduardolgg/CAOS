@@ -1,24 +1,24 @@
 /*
  * Run init scripts in serial mode.
  *
- *		11-Apr-2017 Elgg
+ *    11-Apr-2017 Elgg
  *
- *		This file is part of the CAOS init suite,
- *		Copyright (C) 2017 Eduardo L. García Glez.
+ *    This file is part of the CAOS init suite,
+ *    Copyright (C) 2017 Eduardo L. García Glez.
  *
- *		This program is free software; you can redistribute it and/or modify
- *		it under the terms of the GNU General Public License as published by
- *		the Free Software Foundation; either version 2 of the License, or
- *		(at your option) any later version.
+ *    This program is free software; you can redistribute it and/or modify
+ *    it under the terms of the GNU General Public License as published by
+ *    the Free Software Foundation; either version 2 of the License, or
+ *    (at your option) any later version.
  *
- *		This program is distributed in the hope that it will be useful,
- *		but WITHOUT ANY WARRANTY; without even the implied warranty of
- *		MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *		GNU General Public License for more details.
+ *    This program is distributed in the hope that it will be useful,
+ *    but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *    GNU General Public License for more details.
  *
- *		You should have received a copy of the GNU General Public License
- *		along with this program; if not, you can get a copy at
- *		<http://www.gnu.org/licenses/>
+ *    You should have received a copy of the GNU General Public License
+ *    along with this program; if not, you can get a copy at
+ *    <http://www.gnu.org/licenses/>
  */
 
 #include <sys/types.h>
@@ -38,7 +38,7 @@
 
 void exec_script(char *script_name)
 {
-	switch(FIRST_CHAR(script_name)) {
+	switch (FIRST_CHAR(script_name)) {
 	case 'S':
 		execl(script_name, script_name, START, NULL);
 		break;
@@ -46,8 +46,8 @@ void exec_script(char *script_name)
 		execl(script_name, script_name, STOP, NULL);
 		break;
 	default:
-		print_err_msg_ln("ERROR: %s is not a start/stop script", 
-		  script_name);
+		print_err_msg_ln("ERROR: %s is not a start/stop script",
+		                 script_name);
 	}
 }
 
@@ -60,7 +60,8 @@ void fork_and_exec_script(char *script_name)
 	case 0:
 		exec_script(script_name);
 		/* If we got here something went wrong. */
-		print_current_error_msg("Error to execute script %s", script_name);
+		print_current_error_msg("Error to execute script %s",
+		                        script_name);
 		exit(1);
 		break;
 	case -1:
@@ -73,33 +74,48 @@ void fork_and_exec_script(char *script_name)
 }
 
 /*
+ * Run all scripts listed on script_list located in dirname directory.
+ *
+ * During execution script_list and its contents are released.
+ */
+void exec_all_scripts(char *dirname, struct dirent ***script_list, int list_len)
+{
+	struct dirent **list = *script_list;
+	int i;
+
+	chdir(dirname);
+	for (i = 0; i < list_len; i++) {
+		fork_and_exec_script(list[i]->d_name);
+		free(list[i]);
+	}
+	free(list);
+}
+
+/*
  * Serial start of dirname init scripts.
  */
 int serial_start(char act_runlevel, char prev_runlevel)
 {
-	struct dirent **start_script_list;
+	struct dirent **script_list;
 	char *dirname;
-	int n, i;
+	int list_len;
 
 	dirname = get_script_directory(act_runlevel);
-	switch(prev_runlevel) {
-	case RUNLEVEL_NONE: 
-		n = get_start_init_scripts(dirname, &start_script_list);
+	switch (prev_runlevel) {
+	case RUNLEVEL_NONE:
+		list_len = get_start_init_scripts(dirname, &script_list);
 		break;
 	default:
-		n = get_change_init_scripts(act_runlevel, prev_runlevel, &start_script_list);
+		list_len = get_change_init_scripts(act_runlevel, prev_runlevel,
+		                                          &script_list);
 	}
 
-	if (n < 0) {
+	if (list_len < 0) {
 		print_current_error();
 		return 1;
 	}
 
-	chdir(dirname);
-	for (i = 0; i < n; i++) {
-		fork_and_exec_script(start_script_list[i]->d_name);
-		free(start_script_list[i]);
-	}
-	free(start_script_list);
+	exec_all_scripts(dirname, &script_list, list_len);
+	free(dirname);
 	return 0;
 }
