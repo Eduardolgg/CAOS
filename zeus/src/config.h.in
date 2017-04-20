@@ -37,6 +37,7 @@
  */
 #define RUNLEVEL_NONE 'N'
 #define RUNLEVEL_START 'S'
+#define VALID_LEVELS "S0123456"
 
 #define RCX_DIR "@rcx_directory@"
 #define RCX_XCHAR_LOCATION @rcx_xchar_location@
