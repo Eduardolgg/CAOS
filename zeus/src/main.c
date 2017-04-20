@@ -56,7 +56,7 @@ int main(int argc, char **argv)
 	SET_RUNLEVEL_INFO(prev_runlevel, act_runlevel);
 
 	if (act_runlevel == NULL || prev_runlevel == NULL) {
-		print_err_msg_ln("You must perform the change of runlevel"
+		print_err_msg_ln("You must perform the change of runlevel "
 		                 "from init, see init (8)");
 		print_usage(argv[0]);
 	}

@@ -39,30 +39,8 @@ char *get_script_directory(char code)
 {
 	char *script_dir = (char *) malloc((sizeof (char*)) * RCX_BUFFER_LEN);
 
-	switch (code) {
-	case 'S':
-		/*PRINT_APP_INFO;*/
-	case '0':
-	case '1':
-	case '2':
-	case '3':
-	case '4':
-	case '5':
-	case '6':
-		strcpy(script_dir, RCX_DIR);
-		script_dir[7] = code;
-		break;
-	/* Objetivo tests */
-	#ifdef develop
-	case 'T':
-		strcpy(script_dir, "../tests/fake_init.d");
-		break;
-	#endif
-	default:
-		free(script_dir);
-		script_dir = NULL;
-	}
-
+	strcpy(script_dir, RCX_DIR);
+	script_dir[RCX_XCHAR_LOCATION] = code;
 	return script_dir;
 }
 

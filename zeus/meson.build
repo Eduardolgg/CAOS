@@ -1,4 +1,26 @@
-project('zeus', 'c')
+project('zeus', 'c', license: 'GPLV2')
+buildtype = get_option('buildtype')
+
+conf = configuration_data()
+conf.set('version', '0.0.1')
+if buildtype == 'debug' or buildtype == 'debugoptimized'
+	conf.set('rcx_directory', '../tests/fake_init.d/rcX.d')
+	conf.set('rcx_xchar_location', '23')
+	conf.set('rcx_buffer_len', '27')
+else
+	conf.set('rcx_directory', '/etc/rcX.d')
+	conf.set('rcx_xchar_location', '7')
+	conf.set('rcx_buffer_len', '11')
+endif
+
+configure_file(
+	input: './src/config.h.in',
+	output: 'config.h',
+	configuration: conf
+)
+
+
+
 sources = ['./src/main.c', './src/serial_start.c', './src/filesistem.c']
 zeus = executable('zeus', sources, install: true, install_dir: '/sbin')
 test('No params but env',

@@ -26,13 +26,8 @@
  */
 #define CAOS_NAME "CAOS"
 #define CAOS_SHORT_DESC CAOS_NAME " init suite"
-#define CAOS_VERSION "0.0.0"
+#define CAOS_VERSION "@version@"
 #define CAOS_INFO CAOS_SHORT_DESC " " CAOS_VERSION
-
-/*
- * Compilation constants.
- */
-#define develop
 
 #define USE_COLORS
 /*#undef USE_COLRS*/
@@ -43,12 +38,9 @@
 #define RUNLEVEL_NONE 'N'
 #define RUNLEVEL_START 'S'
 
-#define RCX_DIR "/etc/rcX.d"
-#ifndef develop
-	#define RCX_BUFFER_LEN 11
-#else
-	#define RCX_BUFFER_LEN 21
-#endif
+#define RCX_DIR "@rcx_directory@"
+#define RCX_XCHAR_LOCATION @rcx_xchar_location@
+#define RCX_BUFFER_LEN @rcx_buffer_len@
 
 #define CAOS_BANNER  \
 	"  ▄████▄   ▄▄▄       ▒█████    ██████     ██▓ ███▄    █  ██▓▄▄▄█████▓   \n" \
