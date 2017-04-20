@@ -1,0 +1,2 @@
+This directory has been left without startup scripts intentionally,
+it is useful for tests.

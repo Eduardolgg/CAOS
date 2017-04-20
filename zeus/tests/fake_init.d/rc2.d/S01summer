@@ -14,13 +14,13 @@ cmd=""
 user=""
 
 name=`basename $0`
-stdout_log="./log/$name.log"
+stdout_log="../log/$name.log"
 timestamp=$(date)
 
 case "$1" in
     start)
         echo "Starting $name"
-		sleep 5
+		sleep 8
 		echo "Started $name"
 		echo "$timestamp Starting $name" >> $stdout_log
     ;;
