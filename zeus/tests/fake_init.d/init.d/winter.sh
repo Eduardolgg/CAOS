@@ -20,7 +20,7 @@ timestamp=$(date)
 case "$1" in
     start)
         echo "Starting $name"
-		sleep 3
+		sleep 2
 		echo "Started $name"
 		echo "$timestamp Starting $name" >> $stdout_log
     ;;
