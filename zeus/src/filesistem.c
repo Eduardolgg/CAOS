@@ -23,7 +23,6 @@
 
 #include <stdlib.h>
 #include <string.h>
-#include <strings.h>
 
 #include "config.h"
 #include "screen_print.h"
@@ -40,7 +39,7 @@ char *get_script_directory(char code)
 {
 	char *script_dir;
 
-	if (index(VALID_LEVELS, code) == NULL)
+	if (!IS_VALID_LEVEL(code))
 		return NULL;
 
 	script_dir = (char *) malloc((sizeof (char*)) * RCX_BUFFER_LEN);

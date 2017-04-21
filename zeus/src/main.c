@@ -35,12 +35,47 @@
 #define IS_SYS_BOOT(prev, act) \
 	prev[0] == RUNLEVEL_NONE && act[0] == RUNLEVEL_START
 
-void print_usage(char *app_name)
+char *app_path;
+
+void print_usage()
 {
 	print_text_msg_ln(CAOS_BANNER);
 	printf("Welcome to %s\n", CAOS_SHORT_DESC);
-	printf("Usage: %s {0|1|2|3|4|5|6|S}\n", app_name);
-	exit(1);
+	printf("Usage: %s {0|1|2|3|4|5|6|S}\n", app_path);
+}
+
+/*
+ * Check if prev_runlevel and act_runlevel are valid runlevels.
+ *
+ * Returns an integer equal to zero if runlevels are valid, or
+ * an integer equal to one otherwise.
+ */
+int check_runlevels(char *prev_runlevel, char *act_runlevel)
+{
+	/* NULL is not a good runlevel */
+	if (prev_runlevel == NULL || act_runlevel == NULL)
+		return 1;
+	/* Runlevel code is only one character */
+	if (!(IS_VALID_PREV_LEVEL(prev_runlevel[0]) &&
+	      IS_VALID_LEVEL(act_runlevel[0])))
+		return 1;
+
+	return 0;
+}
+
+/*
+ * Execution ends if runlevels are invalid.
+ */
+void exit_if_invalid_runlevels(char *prev_runlevel, char *act_runlevel)
+{
+	if (check_runlevels(prev_runlevel, act_runlevel)) {
+		print_usage();
+		print_err_msg_ln("You must perform the change of runlevel "
+		                 "from init, see init (8)"
+		                 "Invalid runlevels: prev[%s], act[%s]",
+		                  prev_runlevel, act_runlevel);
+		exit(1);
+	}
 }
 
 
@@ -50,22 +85,20 @@ int main(int argc, char **argv)
 	char *prev_runlevel; /* Previous runlevel */
 	char *act_runlevel;  /* Actual or new runlevel */
 
-	if (argc != 2)
-		print_usage(argv[0]);
+	app_path = argv[0];
+	if (argc != 2) {
+		print_usage();
+		exit(1);
+	}
 
 	SET_RUNLEVEL_INFO(prev_runlevel, act_runlevel);
-
-	if (act_runlevel == NULL || prev_runlevel == NULL) {
-		print_err_msg_ln("You must perform the change of runlevel "
-		                 "from init, see init (8)");
-		print_usage(argv[0]);
-	}
+	exit_if_invalid_runlevels(prev_runlevel, act_runlevel);
 
 	if (IS_SYS_BOOT(prev_runlevel, act_runlevel))
 		PRINT_APP_INFO;
 
 	print_inf_msg_ln("%s: swiching from runlevel[%s] to runlevel[%s]",
-	                 argv[0], prev_runlevel, act_runlevel);
+	                 APP_NAME, prev_runlevel, act_runlevel);
 
 	init_errors = serial_start(act_runlevel[0], prev_runlevel[0]);
 

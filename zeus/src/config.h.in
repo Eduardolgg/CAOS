@@ -21,6 +21,8 @@
  *    <http://www.gnu.org/licenses/>
  */
 
+#include <strings.h>
+
 /*
  * CAOS init suite informaticon
  */
@@ -29,8 +31,12 @@
 #define CAOS_VERSION "@version@"
 #define CAOS_INFO CAOS_SHORT_DESC " " CAOS_VERSION
 
-#define USE_COLORS
-/*#undef USE_COLRS*/
+/*
+ * Application information
+ */
+#define APP_NAME "@app_name@"
+
+#mesondefine USE_COLORS
 
 /*
  * Runlevel info.
@@ -38,6 +44,10 @@
 #define RUNLEVEL_NONE 'N'
 #define RUNLEVEL_START 'S'
 #define VALID_LEVELS "S0123456"
+#define VALID_PREV_LEVELS  "N" VALID_LEVELS
+
+#define IS_VALID_LEVEL(code) (index(VALID_LEVELS, code) != NULL)
+#define IS_VALID_PREV_LEVEL(code) (index(VALID_PREV_LEVELS, code) != NULL)
 
 #define RCX_DIR "@rcx_directory@"
 #define RCX_XCHAR_LOCATION @rcx_xchar_location@
