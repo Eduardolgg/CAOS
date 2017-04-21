@@ -14,13 +14,13 @@ cmd=""
 user=""
 
 name=`basename $0`
-stdout_log="../log/$name.log"
+stdout_log="../log/init.log"
 timestamp=$(date)
 
 case "$1" in
     start)
         echo "Starting $name"
-		sleep 1
+		sleep 0.5
 		echo "Started $name"
 		echo "$timestamp Starting $name" >> $stdout_log
     ;;
@@ -37,8 +37,8 @@ case "$1" in
 		echo "$timestamp Status $name" >> $stdout_log
     ;;
     *)
-    echo "Usage: $0 {start|stop|restart|status}"
-    exit 1
+    	echo "Usage: $0 {start|stop|restart|status}"
+    	exit 1
     ;;
 esac
 
