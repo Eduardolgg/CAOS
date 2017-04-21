@@ -1,4 +1,5 @@
 #include <stdio.h>
+#include <stdlib.h>
 #include <sys/types.h>
 #include <unistd.h>
 #include <sys/wait.h>
@@ -10,6 +11,7 @@ void print_usage()
 {
 	printf("Unit tests to screen_print.c\n");
 	printf("   please use correct param to call tests\n");
+	exit(1);
 }
 
 void close_files(int *fd)
@@ -109,26 +111,33 @@ int is_expected_output(char *option, char *buffer)
 {
 #ifdef USE_COLORS
 	return check_colorized_output(option, buffer);
-#else 
+#else
 	return check_normal_output(option, buffer);
 #endif
 }
-	
+
 int main(int argc, char **argv)
 {
 	pid_t pid;
 	char buffer[50];
 	int fd[2];
 
-	if (!argc) {
+	if (argc < 2)
 		print_usage();
-		return 1;
-	}
 
 	pipe(fd);
-	if ((pid = fork()) != 0) {
-		/* Wait for the child to complete the work before 
-           starting the tests and issue a result. */
+	switch (pid = fork()) {
+	case 0:
+		dup2(fd[1], STDOUT_FILENO);
+		run_print_function(argv[1]);
+		close_files(fd);
+		break;
+	case 1:
+		printf("Fork error");
+		break;
+	default:
+		/* Wait for the child to complete the work before
+		   starting the tests and issue a result. */
 		waitpid(pid, NULL, 0);
 
 		dup2(fd[0], STDIN_FILENO);
@@ -136,10 +145,6 @@ int main(int argc, char **argv)
 		int result = is_expected_output(argv[1], buffer);
 		close_files(fd);
 		return result;
-	} else {
-		dup2(fd[1], STDOUT_FILENO);
-		run_print_function(argv[1]);
-		close_files(fd);
 	}
 	return 0;
 }
