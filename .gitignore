@@ -37,3 +37,6 @@ build
 
 # Vim files
 *.swp
+
+# Application temp files.
+zeus/tests/fake_init.d/log/
