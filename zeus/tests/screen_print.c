@@ -5,7 +5,7 @@
 #include <sys/wait.h>
 #include <string.h>
 
-#include "../src/screen_print.h"
+#include "screen_print.h"
 
 void print_usage()
 {
