@@ -22,6 +22,7 @@
  */
 
 #include <stdio.h>
+#include <syslog.h>
 #include <errno.h>
 #include "config.h"
 
@@ -55,10 +56,10 @@
  * create new like print_text_msg, etc.
  */
 #define PRINT_MSG_GENERIC(msg, lineEnd, color, ...)  \
-({                                    \
-	printf("%s", color);              \
-	printf(msg, ##__VA_ARGS__);       \
-	printf("%s%s", C_RESET, lineEnd); \
+({                                                   \
+	printf("%s", color);                         \
+	printf(msg, ##__VA_ARGS__);                  \
+	printf("%s%s", C_RESET, lineEnd);            \
 })
 
 #define PRINT_MSG(msg, color, ...) \
@@ -81,19 +82,27 @@
 #define print_err_msg(msg, ...) PRINT_MSG(msg, C_RED, ##__VA_ARGS__);
 #define print_err_msg_ln(msg, ...) PRINT_MSG_LN(msg, C_RED, ##__VA_ARGS__);
 
-#define print_current_error() PRINT_MSG_LN(strerror(errno), C_RED);
-#define print_current_error_msg(msg, ...) \
-({                                        \
-	PRINT_MSG(msg, C_RED, ##__VA_ARGS__); \
-	PRINT_MSG_LN(strerror(errno), C_RED); \
+#define print_current_error()                       \
+({                                                  \
+	PRINT_MSG_LN(strerror(errno), C_RED);       \
+	openlog(APP_NAME, LOG_ODELAY, LOG_DAEMON);  \
+	syslog(LOG_ERR, "%s", strerror(errno));     \
+	closelog();                                 \
+})
+#define print_current_error_msg(msg, ...)           \
+({      /* TODO: Too long for a macro? :-/ */       \
+	PRINT_MSG(msg, C_RED, ##__VA_ARGS__);       \
+	PRINT_MSG_LN(strerror(errno), C_RED);       \
+	openlog(APP_NAME, LOG_ODELAY, LOG_DAEMON);  \
+	syslog(LOG_ERR, msg, ##__VA_ARGS__);        \
+	closelog();                                 \
 })
 
 /*
  * Print CAOS init suite information
  */
-#define PRINT_APP_INFO	\
-({                                           \
+#define PRINT_APP_INFO	                         \
+({                                               \
 	print_inf_msg_ln("System is boot up ");  \
 	print_text_msg_ln(CAOS_BANNER);          \
 })
-
