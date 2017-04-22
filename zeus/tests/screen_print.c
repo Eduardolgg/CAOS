@@ -27,25 +27,13 @@ void run_print_function(char *option)
 		print_inf_msg("%s", "PRINT_INF_MSG");
 		break;
 	case 'b':
-		print_inf_msg_ln("%s", "PRINT_INF_MSG_LN");
-		break;
-	case 'c':
 		print_war_msg("%s" ,"PRINT_WAR_MSG");
 		break;
-	case 'd':
-		print_war_msg_ln("%s", "PRINT_WAR_MSG_LN");
-		break;
-	case 'e':
+	case 'c':
 		print_err_msg("%s", "PRINT_ERR_MSG");
 		break;
-	case 'f':
-		print_err_msg_ln("%s", "PRINT_ERR_MSG_LN");
-		break;
-	case 'g':
-		print_err_msg_ln("%s", "PRINT_TEXT_MSG_LN");
-		break;
-	case 'h':
-		print_err_msg_ln("%s", "PRINT_TEXT_MSG_LN");
+	case 'd':
+		print_text_msg("%s", "PRINT_TEXT_MSG");
 		break;
 	default:
 		print_usage();
@@ -61,25 +49,13 @@ int check_text_output(char *option, char *buffer)
 		expected = "PRINT_INF_MSG";
 		break;
 	case 'b':
-		expected = "PRINT_INF_MSG_LN";
-		break;
-	case 'c':
 		expected = "PRINT_WAR_MSG";
 		break;
-	case 'd':
-		expected = "PRINT_WAR_MSG_LN";
-		break;
-	case 'e':
+	case 'c':
 		expected = "PRINT_ERR_MSG";
 		break;
-	case 'f':
-		expected = "PRINT_ERR_MSG_LN";
-		break;
-	case 'g':
-		expected = "PRINT_TEXT_MSG_LN";
-		break;
-	case 'h':
-		expected = "PRINT_TEXT_MSG_LN";
+	case 'd':
+		expected = "PRINT_TEXT_MSG";
 		break;
 	default:
 		return 1;

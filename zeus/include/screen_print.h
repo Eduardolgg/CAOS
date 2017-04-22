@@ -53,48 +53,39 @@
 
 /*
  * Message macros. Please don't use uppercase macros in code,
- * create new like print_text_msg, etc.
+ * create new like print_text_format, etc.
  */
-#define PRINT_MSG_GENERIC(msg, lineEnd, color, ...)  \
-({                                                   \
-	printf("%s", color);                         \
-	printf(msg, ##__VA_ARGS__);                  \
-	printf("%s%s", C_RESET, lineEnd);            \
+#define PRINT_MSG(format, color, ...)          \
+({                                             \
+	printf("%s", color);                   \
+	printf(format, ##__VA_ARGS__);         \
+	printf("%s", C_RESET);                 \
 })
-
-#define PRINT_MSG(msg, color, ...) \
-	PRINT_MSG_GENERIC(msg, "", color, ##__VA_ARGS__);
-#define PRINT_MSG_LN(msg, color, ...) \
-	PRINT_MSG_GENERIC(msg, "\n", color, ##__VA_ARGS__);
 
 /*
  * Message print macros.
  */
-#define print_text_msg(msg, ...) PRINT_MSG(msg, C_GRAY, ##__VA_ARGS__);
-#define print_text_msg_ln(msg, ...) PRINT_MSG_LN(msg, C_GRAY, ##__VA_ARGS__);
+#define print_text_msg(format, ...) PRINT_MSG(format, C_GRAY, ##__VA_ARGS__);
 
-#define print_inf_msg(msg, ...) PRINT_MSG(msg, C_GREEN, ##__VA_ARGS__);
-#define print_inf_msg_ln(msg, ...) PRINT_MSG_LN(msg, C_GREEN, ##__VA_ARGS__);
+#define print_inf_msg(format, ...) PRINT_MSG(format, C_GREEN, ##__VA_ARGS__);
 
-#define print_war_msg(msg, ...) PRINT_MSG(msg, C_YELLOW, ##__VA_ARGS__);
-#define print_war_msg_ln(msg, ...) PRINT_MSG_LN(msg, C_YELLOW, ##__VA_ARGS__);
+#define print_war_msg(format, ...) PRINT_MSG(format, C_YELLOW, ##__VA_ARGS__);
 
-#define print_err_msg(msg, ...) PRINT_MSG(msg, C_RED, ##__VA_ARGS__);
-#define print_err_msg_ln(msg, ...) PRINT_MSG_LN(msg, C_RED, ##__VA_ARGS__);
+#define print_err_msg(format, ...) PRINT_MSG(format, C_RED, ##__VA_ARGS__);
 
 #define print_current_error()                       \
 ({                                                  \
-	PRINT_MSG_LN(strerror(errno), C_RED);       \
+	PRINT_MSG(". %s", C_RED, strerror(errno));  \
 	openlog(APP_NAME, LOG_ODELAY, LOG_DAEMON);  \
 	syslog(LOG_ERR, "%s", strerror(errno));     \
 	closelog();                                 \
 })
-#define print_current_error_msg(msg, ...)           \
+#define print_current_error_msg(format, ...)        \
 ({      /* TODO: Too long for a macro? :-/ */       \
-	PRINT_MSG(msg, C_RED, ##__VA_ARGS__);       \
-	PRINT_MSG_LN(strerror(errno), C_RED);       \
+	PRINT_MSG(format, C_RED, ##__VA_ARGS__);    \
+	PRINT_MSG(". %s", C_RED, strerror(errno));  \
 	openlog(APP_NAME, LOG_ODELAY, LOG_DAEMON);  \
-	syslog(LOG_ERR, msg, ##__VA_ARGS__);        \
+	syslog(LOG_ERR, format, ##__VA_ARGS__);     \
 	closelog();                                 \
 })
 
@@ -103,6 +94,6 @@
  */
 #define PRINT_APP_INFO	                         \
 ({                                               \
-	print_inf_msg_ln("System is boot up ");  \
-	print_text_msg_ln(CAOS_BANNER);          \
+	print_inf_msg("System is boot up\n");  \
+	print_text_msg(CAOS_BANNER);          \
 })

@@ -32,13 +32,12 @@
 #include "screen_print.h"
 #include "filesistem.h"
 
-#define FIRST_CHAR(script_name) script_name[0]
 #define START "start"
 #define STOP "stop"
 
 void exec_script(char *script_name)
 {
-	switch (FIRST_CHAR(script_name)) {
+	switch (script_name[0]) {
 	case 'S':
 		execl(script_name, script_name, START, NULL);
 		break;
@@ -46,7 +45,7 @@ void exec_script(char *script_name)
 		execl(script_name, script_name, STOP, NULL);
 		break;
 	default:
-		print_err_msg_ln("ERROR: %s is not a start/stop script",
+		print_err_msg("ERROR: %s is not a start/stop script\n",
 		                 script_name);
 	}
 }

@@ -39,7 +39,7 @@ char *app_path;
 
 void print_usage()
 {
-	print_text_msg_ln(CAOS_BANNER);
+	print_text_msg("%s", CAOS_BANNER);
 	printf("Welcome to %s\n", CAOS_SHORT_DESC);
 	printf("Usage: %s {0|1|2|3|4|5|6|S}\n", app_path);
 }
@@ -70,10 +70,10 @@ void exit_if_invalid_runlevels(char *prev_runlevel, char *act_runlevel)
 {
 	if (check_runlevels(prev_runlevel, act_runlevel)) {
 		print_usage();
-		print_err_msg_ln("You must perform the change of runlevel "
-		                 "from init, see init (8)"
-		                 "Invalid runlevels: prev[%s], act[%s]",
-		                  prev_runlevel, act_runlevel);
+		print_err_msg("You must perform the change of runlevel "
+		              "from init, see init (8)"
+		              "Invalid runlevels: prev[%s], act[%s]\n",
+		               prev_runlevel, act_runlevel);
 		exit(1);
 	}
 }
@@ -97,13 +97,13 @@ int main(int argc, char **argv)
 	if (IS_SYS_BOOT(prev_runlevel, act_runlevel))
 		PRINT_APP_INFO;
 
-	print_inf_msg_ln("%s: swiching from runlevel[%s] to runlevel[%s]",
-	                 APP_NAME, prev_runlevel, act_runlevel);
+	print_inf_msg("%s: swiching from runlevel[%s] to runlevel[%s]\n",
+	              APP_NAME, prev_runlevel, act_runlevel);
 
 	init_errors = serial_start(act_runlevel[0], prev_runlevel[0]);
 
 	if (init_errors)
-		print_err_msg_ln("Error(s) detected, see log");
+		print_err_msg("Error(s) detected, see log\n");
 
 	return 0;
 }
