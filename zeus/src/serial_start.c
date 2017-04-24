@@ -31,6 +31,7 @@
 #include "serial_start.h"
 #include "screen_print.h"
 #include "filesistem.h"
+#include "processes.h"
 
 #define START "start"
 #define STOP "stop"
@@ -50,10 +51,32 @@ void exec_script(char *script_name)
 	}
 }
 
+void wait_for_child(pid_t pid, char *script_name)
+{
+	int w_status,
+	    status = -1;
+
+	w_status = waitpid(pid, &status, 0);
+
+	if (w_status == -1) {
+		print_current_error_msg("%s: ", script_name);
+		return;
+	}
+
+	if (NORMAL_EXIT(status))
+		syslog_info("%s ran correctly.", script_name);
+	else
+		print_current_error_msg("%s: abnormally ended.",
+					script_name);
+
+	if (NORMAL_EXIT(status) && ERROR_EXIT(status))
+		print_err_msg("%s: exit code [%i]", script_name,
+			      WEXITSTATUS(status));
+}
+
 void fork_and_exec_script(char *script_name)
 {
-	int pid;
-	int status = -1;
+	pid_t pid;
 
 	switch (pid = fork()) {
 	case 0:
@@ -67,8 +90,7 @@ void fork_and_exec_script(char *script_name)
 		print_current_error_msg("Fork error to %s", script_name);
 		break;
 	default:
-		waitpid(pid, &status, 0);
-		/* TODO: check status. */
+		wait_for_child(pid, script_name);
 	}
 }
 

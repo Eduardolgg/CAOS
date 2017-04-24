@@ -23,6 +23,7 @@
 
 #include <stdio.h>
 #include <syslog.h>
+#include <string.h>
 #include <errno.h>
 #include "config.h"
 
@@ -73,19 +74,27 @@
 
 #define print_err_msg(format, ...) PRINT_MSG(format, C_RED, ##__VA_ARGS__);
 
-#define print_current_error()                       \
-({                                                  \
-	PRINT_MSG(". %s", C_RED, strerror(errno));  \
-	openlog(APP_NAME, LOG_ODELAY, LOG_DAEMON);  \
-	syslog(LOG_ERR, "%s", strerror(errno));     \
-	closelog();                                 \
-})
 #define print_current_error_msg(format, ...)        \
 ({      /* TODO: Too long for a macro? :-/ */       \
 	PRINT_MSG(format, C_RED, ##__VA_ARGS__);    \
 	PRINT_MSG(". %s", C_RED, strerror(errno));  \
 	openlog(APP_NAME, LOG_ODELAY, LOG_DAEMON);  \
 	syslog(LOG_ERR, format, ##__VA_ARGS__);     \
+	closelog();                                 \
+})
+
+#define print_current_error()                       \
+({                                                  \
+	print_current_error_msg("%s", "");          \
+})
+
+/*
+ * Syslog messages
+ */
+#define syslog_info(format, ...)                    \
+({                                                  \
+	openlog(APP_NAME, LOG_ODELAY, LOG_DAEMON);  \
+	syslog(LOG_INFO, format, ##__VA_ARGS__);    \
 	closelog();                                 \
 })
 
