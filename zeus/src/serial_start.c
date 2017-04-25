@@ -29,7 +29,7 @@
 #include <string.h>
 
 #include "serial_start.h"
-#include "screen_print.h"
+#include "log.h"
 #include "filesistem.h"
 #include "processes.h"
 

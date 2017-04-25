@@ -5,11 +5,11 @@
 #include <sys/wait.h>
 #include <string.h>
 
-#include "screen_print.h"
+#include "log.h"
 
 void print_usage()
 {
-	printf("Unit tests to screen_print.c\n");
+	printf("Unit tests to log.c\n");
 	printf("   please use correct param to call tests\n");
 	exit(1);
 }

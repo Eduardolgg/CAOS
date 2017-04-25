@@ -25,7 +25,7 @@
 #include <string.h>
 
 #include "config.h"
-#include "screen_print.h"
+#include "log.h"
 #include "filesistem.h"
 
 /*

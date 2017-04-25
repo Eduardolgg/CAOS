@@ -2,7 +2,7 @@
 #include <unistd.h>
 #include <signal.h>
 
-#include "screen_print.h"
+#include "log.h"
 
 void sigterm_handler(int sig)
 {

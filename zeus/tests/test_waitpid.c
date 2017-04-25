@@ -6,7 +6,7 @@
 #include <signal.h>
 #include <pthread.h>
 
-#include "screen_print.h"
+#include "log.h"
 #include "processes.h"
 
 #define DELAY sleep(2)

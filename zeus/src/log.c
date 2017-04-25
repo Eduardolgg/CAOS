@@ -2,7 +2,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <stdarg.h>
-#include "screen_print.h"
+#include "log.h"
 
 #define vprint_chunk(writed_chars, buffer, var_args) \
 	(writed_chars >=0) ? vprintf(buffer, var_args) : -1

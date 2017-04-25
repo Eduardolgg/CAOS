@@ -27,7 +27,7 @@
 #include <stdlib.h>
 
 #include "config.h"
-#include "screen_print.h"
+#include "log.h"
 #include "serial_start.h"
 
 #define SET_RUNLEVEL_INFO(prev, act) act = getenv("RUNLEVEL"); \

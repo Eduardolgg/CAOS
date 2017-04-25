@@ -1,9 +1,9 @@
 # Executables for tests
 thread_dep = dependency('threads')
 
-sources = ['screen_print.c', '../src/log.c']
-screen_print_tests = executable(
-	't_screen_print',
+sources = ['log.c', '../src/log.c']
+log_tests = executable(
+	't_log',
 	sources,
 	include_directories: inc,
 	install: false
@@ -27,13 +27,13 @@ waitpid_aux_tests = executable(
 )
 
 # Screen print tests.
-test('Usage screen_print', screen_print_tests, args: [], should_fail: true)
-test('Info print', screen_print_tests, args: ['a'])
-test('Warning print', screen_print_tests, args: ['b'])
-test('Error print', screen_print_tests, args: ['c'])
-test('Text print', screen_print_tests, args: ['d'])
-test('Text break line', screen_print_tests, args: ['e'])
-test('Missing argument', screen_print_tests, args: ['f'], should_fail: true)
+test('Usage log', log_tests, args: [], should_fail: true)
+test('Info print', log_tests, args: ['a'])
+test('Warning print', log_tests, args: ['b'])
+test('Error print', log_tests, args: ['c'])
+test('Text print', log_tests, args: ['d'])
+test('Text break line', log_tests, args: ['e'])
+test('Missing argument', log_tests, args: ['f'], should_fail: true)
 
 # Aux waitpid tests.
 test('Success child exit status', waitpid_tests, args: ['i'])
