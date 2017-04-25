@@ -53,31 +53,22 @@
 #define ERR "C_RED"
 
 /*
- * Message macros. Please don't use uppercase macros in code,
- * create new like print_text_format, etc.
- */
-#define PRINT_MSG(format, color, ...)          \
-({                                             \
-	printf("%s", color);                   \
-	printf(format, ##__VA_ARGS__);         \
-	printf("%s", C_RESET);                 \
-})
-
-/*
  * Message print macros.
  */
-#define print_text_msg(format, ...) PRINT_MSG(format, C_GRAY, ##__VA_ARGS__);
+int print_msg(char *format, char *color, ...);
 
-#define print_inf_msg(format, ...) PRINT_MSG(format, C_GREEN, ##__VA_ARGS__);
+#define print_text_msg(format, ...) print_msg(format, C_GRAY, ##__VA_ARGS__);
 
-#define print_war_msg(format, ...) PRINT_MSG(format, C_YELLOW, ##__VA_ARGS__);
+#define print_inf_msg(format, ...) print_msg(format, C_GREEN, ##__VA_ARGS__);
 
-#define print_err_msg(format, ...) PRINT_MSG(format, C_RED, ##__VA_ARGS__);
+#define print_war_msg(format, ...) print_msg(format, C_YELLOW, ##__VA_ARGS__);
+
+#define print_err_msg(format, ...) print_msg(format, C_RED, ##__VA_ARGS__);
 
 #define print_current_error_msg(format, ...)        \
 ({      /* TODO: Too long for a macro? :-/ */       \
-	PRINT_MSG(format, C_RED, ##__VA_ARGS__);    \
-	PRINT_MSG(". %s", C_RED, strerror(errno));  \
+	print_msg(format, C_RED, ##__VA_ARGS__);    \
+	print_msg(". %s", C_RED, strerror(errno));  \
 	openlog(APP_NAME, LOG_ODELAY, LOG_DAEMON);  \
 	syslog(LOG_ERR, format, ##__VA_ARGS__);     \
 	closelog();                                 \
@@ -103,6 +94,6 @@
  */
 #define PRINT_APP_INFO	                         \
 ({                                               \
-	print_inf_msg("System is boot up\n");  \
-	print_text_msg(CAOS_BANNER);          \
+	print_inf_msg("System is boot up\n");    \
+	print_text_msg(CAOS_BANNER);             \
 })

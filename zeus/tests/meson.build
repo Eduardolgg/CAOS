@@ -1,7 +1,7 @@
 # Executables for tests
 thread_dep = dependency('threads')
 
-sources = ['./screen_print.c']
+sources = ['screen_print.c', '../src/log.c']
 screen_print_tests = executable(
 	't_screen_print',
 	sources,
@@ -9,7 +9,7 @@ screen_print_tests = executable(
 	install: false
 )
 
-sources = ['test_waitpid.c']
+sources = ['test_waitpid.c', '../src/log.c']
 waitpid_tests = executable(
 	't_waitpid',
 	sources,
@@ -18,7 +18,7 @@ waitpid_tests = executable(
 	dependencies: thread_dep
 )
 
-sources = ['test_waitpid_aux.c']
+sources = ['test_waitpid_aux.c', '../src/log.c']
 waitpid_aux_tests = executable(
 	't_waitpid_aux',
 	sources,
@@ -32,7 +32,8 @@ test('Info print', screen_print_tests, args: ['a'])
 test('Warning print', screen_print_tests, args: ['b'])
 test('Error print', screen_print_tests, args: ['c'])
 test('Text print', screen_print_tests, args: ['d'])
-test('Missing argument', screen_print_tests, args: ['e'], should_fail: true)
+test('Text break line', screen_print_tests, args: ['e'])
+test('Missing argument', screen_print_tests, args: ['f'], should_fail: true)
 
 # Aux waitpid tests.
 test('Success child exit status', waitpid_tests, args: ['i'])

@@ -35,6 +35,9 @@ void run_print_function(char *option)
 	case 'd':
 		print_text_msg("%s", "PRINT_TEXT_MSG");
 		break;
+	case 'e':
+		print_inf_msg("%s", "PRINT_INF_MSG\n");
+		break;
 	default:
 		print_usage();
 	}
@@ -56,6 +59,9 @@ int check_text_output(char *option, char *buffer)
 		break;
 	case 'd':
 		expected = "PRINT_TEXT_MSG";
+		break;
+	case 'e':
+		expected = "PRINT_INF_MSG\n";
 		break;
 	default:
 		return 1;
