@@ -4,6 +4,7 @@
 rm -rf ./tests/fake_init.d/log/*
 
 cd ./build
+ninja clean
 ninja
 ninja test
 ninja coverage-xml
