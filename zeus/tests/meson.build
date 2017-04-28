@@ -34,6 +34,15 @@ filesystem_tests = executable(
 	install: false
 )
 
+sources = ['runlevel_utils.c', '../src/runlevel_utils.c',
+           '../src/filesystem.c', '../src/log.c']
+runlevel_tests = executable(
+	't_runlevel',
+	sources,
+	include_directories: inc,
+	install: false
+)
+
 # Screen print tests.
 test('Usage log', log_tests, args: [], should_fail: true)
 test('Info print', log_tests, args: ['a'])
@@ -61,6 +70,17 @@ test('Change init diff 2->9', filesystem_tests, args: ['2', '9', '1'],
 test('Change init diff 9->2', filesystem_tests, args: ['9', '2', '1'],
 	should_fail: true)
 
+# Runlevel tests.
+test('Runlevel uninitialized pointers', runlevel_tests,
+	args: ['a'], should_fail: true)
+test('Runlevel free memory', runlevel_tests,
+	args: ['b'], env: ['PREVLEVEL=N', 'RUNLEVEL=S'])
+test('Check runlevels', runlevel_tests,
+	args: ['c'])
+test('Check set runlevel 1', runlevel_tests,
+	args: ['d'], env: ['NONE_SET=:)'])
+test('Check set runlevel 2', runlevel_tests,
+	args: ['d'], env: ['RUNLEVEL=S'])
 # Zeus tests.
 test('No params but env',
 	zeus,
