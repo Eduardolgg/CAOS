@@ -78,8 +78,8 @@ int main(int argc, char **argv)
 	if (init_errors)
 		print_err_msg("Error(s) detected, see log\n");
 
-	free(prev_runlevel.dir);
-	free(new_runlevel.dir);
+	free_runlevel_items(&prev_runlevel);
+	free_runlevel_items(&new_runlevel);
 
 	return 0;
 }
