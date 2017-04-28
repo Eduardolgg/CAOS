@@ -1,3 +1,5 @@
+#pragma once
+
 /*
  * Filesistem access.
  *
@@ -22,6 +24,16 @@
  */
 
 #include <dirent.h>
+
+#include "runlevel_utils.h"
+
+/*
+ * Allows to manage script lists in one place.
+ */
+struct script_list {
+	struct dirent **list;
+	int len;
+};
 
 /*
  * All init scripts in rcX directories have a prefix in that format
@@ -68,6 +80,13 @@
 	scandir(dir, namelist, boot_select, alphasort)
 
 /*
+ * This function traverses the list releasing the memory of
+ * each file pointed by script_list, then free the script_list memory.
+ */
+void free_script_list(struct script_list *script_list);
+void free_script_llist(struct dirent ***script_list, int list_len);
+
+/*
  * Calculate the scripts pending execution between the previous runlevel
  * and the current runlevel.
  *
@@ -78,8 +97,9 @@
  * Note: The operation is similar to scandir, it actually calls scandir
  * several times.
  */
-int get_change_init_scripts(char act_runlevel, char prev_runlevel,
-	struct dirent ***script_list);
+int get_change_init_scripts(struct runlevel *prev_level,
+                            struct runlevel *new_level,
+                            struct dirent ***script_list);
 
 /*
  * Allows you to select only the startup scripts, starting with S.

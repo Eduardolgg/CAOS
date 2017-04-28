@@ -30,8 +30,9 @@
 
 #include "serial_start.h"
 #include "log.h"
-#include "filesistem.h"
+#include "filesystem.h"
 #include "processes.h"
+#include "runlevel_utils.h"
 
 #define START "start"
 #define STOP "stop"
@@ -46,8 +47,8 @@ void exec_script(char *script_name)
 		execl(script_name, script_name, STOP, NULL);
 		break;
 	default:
-		print_err_msg("ERROR: %s is not a start/stop script\n",
-		                 script_name);
+		print_err_msg("ERROR: %s is not a start/stop script, it will "
+		              "not run.\n", script_name);
 	}
 }
 
@@ -103,8 +104,10 @@ void exec_all_scripts(char *dirname, struct dirent ***script_list, int list_len)
 {
 	struct dirent **list = *script_list;
 	int i;
-
-	chdir(dirname);
+	if (chdir(dirname)) {
+		print_current_error();
+		exit(1);
+	}
 	for (i = 0; i < list_len; i++) {
 		fork_and_exec_script(list[i]->d_name);
 		free(list[i]);
@@ -113,30 +116,36 @@ void exec_all_scripts(char *dirname, struct dirent ***script_list, int list_len)
 }
 
 /*
- * Serial start of dirname init scripts.
+ * Change from prev_level runlevel to new_level runlevel in serial mode.
+ *
+ * If prev_level code is equal to RUNLEVEL_NONE, all scripts in
+ * new_runlevel are runned.
+ *
+ * The returned value is equal to zero if no error was detected, On
+ * error return 1.
+ *
+ * Note: This function send status information to the screen
+ * and to syslog.
  */
-int serial_start(char act_runlevel, char prev_runlevel)
+int serial_start(struct runlevel *prev_level, struct runlevel *new_level)
 {
 	struct dirent **script_list;
-	char *dirname;
 	int list_len;
 
-	dirname = get_script_directory(act_runlevel);
-	switch (prev_runlevel) {
-	case RUNLEVEL_NONE:
-		list_len = get_start_init_scripts(dirname, &script_list);
-		break;
-	default:
-		list_len = get_change_init_scripts(act_runlevel, prev_runlevel,
-		                                          &script_list);
-	}
-
+	if (prev_level->code == RUNLEVEL_NONE)
+		list_len = get_start_init_scripts(new_level->dir,
+		                                  &script_list);
+	else
+		list_len = get_change_init_scripts(prev_level, new_level,
+		                                   &script_list);
 	if (list_len < 0) {
 		print_current_error();
 		return 1;
 	}
 
-	exec_all_scripts(dirname, &script_list, list_len);
-	free(dirname);
+	exec_all_scripts(new_level->dir, &script_list, list_len);
+	// Actually exec_all_scripts free all script_list memory...
+	// I'm thinking the next line.
+	// free_script_llist(&script_list, list_len);
 	return 0;
 }

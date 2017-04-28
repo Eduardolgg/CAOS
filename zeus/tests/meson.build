@@ -26,6 +26,14 @@ waitpid_aux_tests = executable(
 	install: false
 )
 
+sources = ['filesystem.c', '../src/filesystem.c', '../src/log.c']
+filesystem_tests = executable(
+	't_filesystem',
+	sources,
+	include_directories: inc,
+	install: false
+)
+
 # Screen print tests.
 test('Usage log', log_tests, args: [], should_fail: true)
 test('Info print', log_tests, args: ['a'])
@@ -40,6 +48,18 @@ test('Success child exit status', waitpid_tests, args: ['i'])
 test('Error child exit status', waitpid_tests, args: ['e'], should_fail: true)
 test('Crash child', waitpid_tests, args: ['b'], should_fail: true)
 test('Wait for child', waitpid_tests, args: ['s'])
+
+# Filesystem tests.
+test('Change init diff usage', filesystem_tests, args: [], should_fail: true)
+test('Change init diff 2->4', filesystem_tests, args: ['2', '4', '3'])
+test('Change init diff 2->5', filesystem_tests, args: ['2', '5', '0'])
+test('Change init diff 5->2', filesystem_tests, args: ['5', '2', '4'])
+test('Change init diff 3->4', filesystem_tests, args: ['3', '4', '0'])
+test('Change init diff 2->S', filesystem_tests, args: ['2', 'S', '1'])
+test('Change init diff 2->9', filesystem_tests, args: ['2', '9', '1'],
+	should_fail: true)
+test('Change init diff 9->2', filesystem_tests, args: ['9', '2', '1'],
+	should_fail: true)
 
 # Zeus tests.
 test('No params but env',

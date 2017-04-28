@@ -1,4 +1,6 @@
-sources = ['main.c', 'serial_start.c', 'filesistem.c', 'log.c']
+sources = ['main.c', 'serial_start.c', 'runlevel_utils.c', 'filesystem.c',
+           'log.c'
+]
 zeus = executable(
 	'zeus',
 	sources,

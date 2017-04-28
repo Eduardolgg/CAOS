@@ -23,17 +23,12 @@
  */
 
 #include <unistd.h>
-#include <string.h>
 #include <stdlib.h>
 
 #include "config.h"
 #include "log.h"
+#include "runlevel_utils.h"
 #include "serial_start.h"
-
-#define SET_RUNLEVEL_INFO(prev, act) act = getenv("RUNLEVEL"); \
-                                     prev = getenv("PREVLEVEL")
-#define IS_SYS_BOOT(prev, act) \
-	prev[0] == RUNLEVEL_NONE && act[0] == RUNLEVEL_START
 
 char *app_path;
 
@@ -45,45 +40,23 @@ void print_usage()
 }
 
 /*
- * Check if prev_runlevel and act_runlevel are valid runlevels.
- *
- * Returns an integer equal to zero if runlevels are valid, or
- * an integer equal to one otherwise.
- */
-int check_runlevels(char *prev_runlevel, char *act_runlevel)
-{
-	/* NULL is not a good runlevel */
-	if (prev_runlevel == NULL || act_runlevel == NULL)
-		return 1;
-	/* Runlevel code is only one character */
-	if (!(IS_VALID_PREV_LEVEL(prev_runlevel[0]) &&
-	      IS_VALID_LEVEL(act_runlevel[0])))
-		return 1;
-
-	return 0;
-}
-
-/*
  * Execution ends if runlevels are invalid.
  */
-void exit_if_invalid_runlevels(char *prev_runlevel, char *act_runlevel)
+void exit_invalid_runlevels(char prev_runlevel, char new_runlevel)
 {
-	if (check_runlevels(prev_runlevel, act_runlevel)) {
-		print_usage();
-		print_err_msg("You must perform the change of runlevel "
-		              "from init, see init (8)"
-		              "Invalid runlevels: prev[%s], act[%s]\n",
-		               prev_runlevel, act_runlevel);
-		exit(1);
-	}
+	print_usage();
+	print_err_msg("You must perform the change of runlevel "
+		      "from init, see init (8)\n"
+		      "Invalid runlevels: prev[%c], act[%c]\n",
+		       prev_runlevel, new_runlevel);
+	exit(1);
 }
-
 
 int main(int argc, char **argv)
 {
 	int init_errors;
-	char *prev_runlevel; /* Previous runlevel */
-	char *act_runlevel;  /* Actual or new runlevel */
+	struct runlevel prev_runlevel; /* Previous runlevel */
+	struct runlevel new_runlevel;  /* Actual or new runlevel */
 
 	app_path = argv[0];
 	if (argc != 2) {
@@ -91,19 +64,22 @@ int main(int argc, char **argv)
 		exit(1);
 	}
 
-	SET_RUNLEVEL_INFO(prev_runlevel, act_runlevel);
-	exit_if_invalid_runlevels(prev_runlevel, act_runlevel);
+	if (set_runlevel_info(&prev_runlevel, &new_runlevel))
+		exit_invalid_runlevels(prev_runlevel.code, new_runlevel.code);
 
-	if (IS_SYS_BOOT(prev_runlevel, act_runlevel))
+	if (IS_SYS_BOOT(prev_runlevel.code, new_runlevel.code))
 		PRINT_APP_INFO;
 
-	print_inf_msg("%s: swiching from runlevel[%s] to runlevel[%s]\n",
-	              APP_NAME, prev_runlevel, act_runlevel);
+	print_inf_msg("%s: swiching from runlevel[%c] to runlevel[%c]\n",
+	              APP_NAME, prev_runlevel.code, new_runlevel.code);
 
-	init_errors = serial_start(act_runlevel[0], prev_runlevel[0]);
+	init_errors = serial_start(&prev_runlevel, &new_runlevel);
 
 	if (init_errors)
 		print_err_msg("Error(s) detected, see log\n");
+
+	free(prev_runlevel.dir);
+	free(new_runlevel.dir);
 
 	return 0;
 }
