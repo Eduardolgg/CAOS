@@ -12,4 +12,5 @@ ninja coverage-text
 rm -rf ./meson-logs/coveragereport/
 ninja coverage-html
 
-mesontest --wrap=valgrind
+#mesontest --wrap=valgrind
+mesontest --setup=valgrind_trace_children

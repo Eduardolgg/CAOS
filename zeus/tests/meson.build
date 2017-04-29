@@ -1,6 +1,10 @@
 # Executables for tests
 thread_dep = dependency('threads')
 
+add_test_setup('valgrind_trace_children',
+	exe_wrapper: ['valgrind', '--trace-children=yes']
+)
+
 sources = ['log.c', '../src/log.c']
 log_tests = executable(
 	't_log',
@@ -60,15 +64,18 @@ test('Wait for child', waitpid_tests, args: ['s'])
 
 # Filesystem tests.
 test('Change init diff usage', filesystem_tests, args: [], should_fail: true)
-test('Change init diff 2->4', filesystem_tests, args: ['2', '4', '3'])
-test('Change init diff 2->5', filesystem_tests, args: ['2', '5', '0'])
-test('Change init diff 5->2', filesystem_tests, args: ['5', '2', '4'])
-test('Change init diff 3->4', filesystem_tests, args: ['3', '4', '0'])
-test('Change init diff 2->S', filesystem_tests, args: ['2', 'S', '1'])
-test('Change init diff 2->9', filesystem_tests, args: ['2', '9', '1'],
+test('Change init diff 2->4', filesystem_tests, args: ['a', '2', '4', '3'])
+test('Change init diff 2->5', filesystem_tests, args: ['a', '2', '5', '0'])
+test('Change init diff 5->2', filesystem_tests, args: ['a', '5', '2', '4'])
+test('Change init diff 3->4', filesystem_tests, args: ['a', '3', '4', '0'])
+test('Change init diff 2->S', filesystem_tests, args: ['a', '2', 'S', '1'])
+test('Change init diff 2->9', filesystem_tests, args: ['a', '2', '9', '1'],
 	should_fail: true)
-test('Change init diff 9->2', filesystem_tests, args: ['9', '2', '1'],
+test('Change init diff 9->2', filesystem_tests, args: ['a', '9', '2', '1'],
 	should_fail: true)
+test('Get script dir, wrong code', filesystem_tests, args: ['b', '9', '-', '-'])
+test('free_script_llist', filesystem_tests, args: ['c', '2', '5', '-'])
+
 
 # Runlevel tests.
 test('Runlevel uninitialized pointers', runlevel_tests,
@@ -81,6 +88,11 @@ test('Check set runlevel 1', runlevel_tests,
 	args: ['d'], env: ['NONE_SET=:)'])
 test('Check set runlevel 2', runlevel_tests,
 	args: ['d'], env: ['RUNLEVEL=S'])
+test('Check runlevel param error', runlevel_tests,
+	args: ['e'], should_fail: true)
+test('Check runlevel test usage', runlevel_tests,
+	args: [], should_fail: true)
+
 # Zeus tests.
 test('No params but env',
 	zeus,

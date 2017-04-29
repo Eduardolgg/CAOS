@@ -117,6 +117,7 @@ void free_script_llist(struct dirent ***script_list, int list_len)
 	slist.len = list_len;
 
 	free_script_list(&slist);
+	*script_list = NULL;
 }
 
 int script_diff(struct script_list *prev,
