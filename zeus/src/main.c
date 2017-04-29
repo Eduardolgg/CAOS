@@ -67,7 +67,7 @@ int main(int argc, char **argv)
 	if (set_runlevel_info(&prev_runlevel, &new_runlevel))
 		exit_invalid_runlevels(prev_runlevel.code, new_runlevel.code);
 
-	if (IS_SYS_BOOT(prev_runlevel.code, new_runlevel.code))
+	if (IS_SYS_BOOT_START(prev_runlevel.code, new_runlevel.code))
 		PRINT_APP_INFO;
 
 	print_inf_msg("%s: swiching from runlevel[%c] to runlevel[%c]\n",

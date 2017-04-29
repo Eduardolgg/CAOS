@@ -132,7 +132,7 @@ int serial_start(struct runlevel *prev_level, struct runlevel *new_level)
 	struct dirent **script_list;
 	int list_len;
 
-	if (prev_level->code == RUNLEVEL_NONE)
+	if (IS_SYS_BOOT(prev_level->code))
 		list_len = get_start_init_scripts(new_level->dir,
 		                                  &script_list);
 	else
