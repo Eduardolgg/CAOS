@@ -1,7 +1,7 @@
 /*
  * Run init scripts in serial mode.
  *
- *    11-Apr-2017 Elgg
+ *    02-May-2017 Elgg
  *
  *    This file is part of the CAOS init suite,
  *    Copyright (C) 2017 Eduardo L. García Glez.
@@ -27,8 +27,8 @@
 #include <sys/wait.h>
 #include <dirent.h>
 #include <string.h>
+#include <pthread.h>
 
-#include "serial_start.h"
 #include "log.h"
 #include "filesystem.h"
 #include "processes.h"
@@ -78,24 +78,25 @@ void wait_for_child(pid_t pid, char *script_name)
 }
 
 static
-void fork_and_exec_script(char *script_name)
+void *fork_and_exec_script(void *script_name)
 {
 	pid_t pid;
 
 	switch (pid = fork()) {
 	case 0:
-		exec_script(script_name);
+		exec_script((char *) script_name);
 		/* If we got here something went wrong. */
 		print_current_error_msg("Error to execute script %s",
-		                        script_name);
+		                        (char *) script_name);
 		exit(1);
 		break;
 	case -1:
-		print_current_error_msg("Fork error to %s", script_name);
+		print_current_error_msg("Fork error to %s", (char *) script_name);
 		break;
 	default:
-		wait_for_child(pid, script_name);
+		wait_for_child(pid, (char *) script_name);
 	}
+	pthread_exit(script_name);
 }
 
 /*
@@ -106,32 +107,50 @@ void fork_and_exec_script(char *script_name)
 static
 void exec_all_scripts(char *dirname, struct dirent ***script_list, int list_len)
 {
+	//TODO: check malloc error.
+	pthread_t *pth_list = (pthread_t *) malloc(sizeof(pthread_t) *
+						   list_len);
+	pthread_t *pth_aux;
 	struct dirent **list = *script_list;
-	int i;
+	int i, pth_error;
+	char *pth_output;
+
+	pth_aux = pth_list;
+
 	if (chdir(dirname)) {
 		print_current_error();
 		exit(1);
 	}
-	for (i = 0; i < list_len; i++) {
-		fork_and_exec_script(list[i]->d_name);
-		free(list[i]);
+
+	if (list_len > 0) {
+		pth_error = pthread_create(pth_aux++, NULL,
+					   fork_and_exec_script,
+					   list[0]->d_name);
 	}
-	free(list);
+
+	for (i = 1; i < list_len; i++) {
+		if (strncmp(list[i - 1]->d_name, list[i]->d_name, 3) == 0) {
+			pth_error = pthread_create(pth_aux++, NULL,
+						   fork_and_exec_script,
+						   list[i]->d_name);
+		} else {
+			while (pth_aux != pth_list) {
+				pth_error = pthread_join(*--pth_aux,
+							 (void **)&pth_output);
+			}
+			pth_error = pthread_create(pth_aux++, NULL,
+						   fork_and_exec_script,
+						   list[i]->d_name);
+		}
+	}
+	while (pth_aux != pth_list) {
+		pth_error = pthread_join(*--pth_aux,
+					 (void **)&pth_output);
+	}
+	free(pth_list);
 }
 
-/*
- * Change from prev_level runlevel to new_level runlevel in serial mode.
- *
- * If prev_level code is equal to RUNLEVEL_NONE, all scripts in
- * new_runlevel are runned.
- *
- * The returned value is equal to zero if no error was detected, On
- * error return 1.
- *
- * Note: This function send status information to the screen
- * and to syslog.
- */
-int serial_start(struct runlevel *prev_level, struct runlevel *new_level)
+int low_parallel_start(struct runlevel *prev_level, struct runlevel *new_level)
 {
 	struct dirent **script_list;
 	int list_len;
@@ -148,8 +167,6 @@ int serial_start(struct runlevel *prev_level, struct runlevel *new_level)
 	}
 
 	exec_all_scripts(new_level->dir, &script_list, list_len);
-	// Actually exec_all_scripts free all script_list memory...
-	// I'm thinking the next line.
-	// free_script_llist(&script_list, list_len);
+	free_script_llist(&script_list, list_len);
 	return 0;
 }

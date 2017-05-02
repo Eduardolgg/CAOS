@@ -1,6 +1,4 @@
 # Executables for tests
-thread_dep = dependency('threads')
-
 add_test_setup('valgrind_trace_children',
 	exe_wrapper: ['valgrind', '--trace-children=yes']
 )
@@ -160,4 +158,19 @@ test('Switch runlevel, empty runlevel',
 	zeus,
 	args: ['5'],
 	env: ['PREVLEVEL=3', 'RUNLEVEL=5']
+)
+test('LP Booting rcS scrips',
+	zeus,
+	args: ['low_parallel'],
+	env: ['PREVLEVEL=N', 'RUNLEVEL=S']
+)
+test('LP Booting rc2 scrips',
+	zeus,
+	args: ['low_parallel'],
+	env: ['PREVLEVEL=N', 'RUNLEVEL=2']
+)
+test('LP Switch runlevel, diferents scripts',
+	zeus,
+	args: ['low_parallel'],
+	env: ['PREVLEVEL=2', 'RUNLEVEL=3']
 )

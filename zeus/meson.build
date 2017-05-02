@@ -1,4 +1,4 @@
-project('Zeus', 'c', license: 'GPLV2', version: '0.1.0')
+project('Zeus', 'c', license: 'GPLV2', version: '0.1.1b')
 buildtype = get_option('buildtype')
 
 inc = include_directories('include')

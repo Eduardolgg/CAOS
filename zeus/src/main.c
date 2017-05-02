@@ -29,6 +29,7 @@
 #include "log.h"
 #include "runlevel_utils.h"
 #include "serial_start.h"
+#include "low_parallel_start.h"
 
 char *app_path;
 
@@ -73,7 +74,10 @@ int main(int argc, char **argv)
 	print_inf_msg("%s: swiching from runlevel[%c] to runlevel[%c]\n",
 	              APP_NAME, prev_runlevel.code, new_runlevel.code);
 
-	init_errors = serial_start(&prev_runlevel, &new_runlevel);
+	if (strcmp(argv[1], "low_parallel") == 0)
+		init_errors = low_parallel_start(&prev_runlevel, &new_runlevel);
+	else
+		init_errors = serial_start(&prev_runlevel, &new_runlevel);
 
 	if (init_errors)
 		print_err_msg("Error(s) detected, see log\n");
