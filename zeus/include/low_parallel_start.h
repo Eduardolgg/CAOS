@@ -1,7 +1,7 @@
 /*
  * Run init scripts in serial mode.
  *
- *    11-Apr-2017 Elgg
+ *    02-May-2017 Elgg
  *
  *    This file is part of the CAOS init suite,
  *    Copyright (C) 2017 Eduardo L. García Glez.

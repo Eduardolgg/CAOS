@@ -1,7 +1,7 @@
 /*
  * Run init scripts in serial mode.
  *
- *    02-May-2017 Elgg
+ *    11-Apr-2017 Elgg
  *
  *    This file is part of the CAOS init suite,
  *    Copyright (C) 2017 Eduardo L. García Glez.
@@ -99,6 +99,23 @@ void *fork_and_exec_script(void *script_name)
 	pthread_exit(script_name);
 }
 
+#define wait_for_threads(pth_list, pth_aux, pth_output, pth_error)           \
+({                                                                           \
+	while (pth_aux != pth_list) {                                        \
+		pth_error = pthread_join(*--pth_aux, (void **) &pth_output); \
+		if (pth_error != 0)                                          \
+			print_current_error();                               \
+	}                                                                    \
+})
+
+#define list_end(index, len) (index == list_len - 1)
+#define same_level(script_a, script_b) \
+	(strncmp(script_a, script_b, 3) == 0)
+#define time_to_wait(script_list, len, index) \
+	(list_end(index, len) || \
+	(!list_end(index, len) && !same_level(script_list[index + 1]->d_name, \
+	                                      script_list[index]->d_name)))
+
 /*
  * Run all scripts listed on script_list located in dirname directory.
  *
@@ -111,9 +128,9 @@ void exec_all_scripts(char *dirname, struct dirent ***script_list, int list_len)
 	pthread_t *pth_list = (pthread_t *) malloc(sizeof(pthread_t) *
 						   list_len);
 	pthread_t *pth_aux;
-	struct dirent **list = *script_list;
-	int i, pth_error;
 	char *pth_output;
+	struct dirent **list = *script_list;
+	int i, error;
 
 	pth_aux = pth_list;
 
@@ -122,30 +139,16 @@ void exec_all_scripts(char *dirname, struct dirent ***script_list, int list_len)
 		exit(1);
 	}
 
-	if (list_len > 0) {
-		pth_error = pthread_create(pth_aux++, NULL,
-					   fork_and_exec_script,
-					   list[0]->d_name);
-	}
+	if (list_len < 1)
+		return;
 
-	for (i = 1; i < list_len; i++) {
-		if (strncmp(list[i - 1]->d_name, list[i]->d_name, 3) == 0) {
-			pth_error = pthread_create(pth_aux++, NULL,
-						   fork_and_exec_script,
-						   list[i]->d_name);
-		} else {
-			while (pth_aux != pth_list) {
-				pth_error = pthread_join(*--pth_aux,
-							 (void **)&pth_output);
-			}
-			pth_error = pthread_create(pth_aux++, NULL,
-						   fork_and_exec_script,
-						   list[i]->d_name);
-		}
-	}
-	while (pth_aux != pth_list) {
-		pth_error = pthread_join(*--pth_aux,
-					 (void **)&pth_output);
+	for (i = 0; i < list_len; i++) {
+		error = pthread_create(pth_aux++, NULL,
+		                       fork_and_exec_script,
+		                       list[i]->d_name);
+
+		if (time_to_wait(list, list_len, i))
+			wait_for_threads(pth_list, pth_aux, pth_output, error);
 	}
 	free(pth_list);
 }
