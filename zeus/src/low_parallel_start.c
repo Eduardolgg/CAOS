@@ -99,15 +99,20 @@ void *fork_and_exec_script(void *script_name)
 	pthread_exit(script_name);
 }
 
-#define wait_for_threads(pth_list, pth_aux, pth_output, status)              \
+#define wait_for_thread(pth_list, pth_aux, pth_output, status)           \
+({                                                                       \
+	int pth_error = pthread_join(*--pth_aux, (void **) &pth_output); \
+	if (pth_error != 0) {                                            \
+		print_current_error();                                   \
+		status = -1;                                             \
+	}                                                                \
+})
+
+
+#define wait_for_all_threads(pth_list, pth_aux, pth_output, status)          \
 ({                                                                           \
-	int pth_error;                                                       \
 	while (pth_aux != pth_list) {                                        \
-		pth_error = pthread_join(*--pth_aux, (void **) &pth_output); \
-		if (pth_error != 0) {                                        \
-			print_current_error();                               \
-			status = -1;                                         \
-		}                                                            \
+		wait_for_thread(pth_list, pth_aux, pth_output, status);      \
 	}                                                                    \
 })
 
@@ -116,6 +121,7 @@ void *fork_and_exec_script(void *script_name)
 #define same_level(script_a, script_b)        \
 	(strncmp(script_a, script_b, 3) == 0)
 
+#define MAX_THREADS 4
 #define time_to_wait(script_list, len, index)                                 \
 	(list_end(index, len) ||                                              \
 	(!list_end(index, len) && !same_level(script_list[index + 1]->d_name, \
@@ -152,7 +158,9 @@ int exec_all_scripts(char *dirname, struct dirent ***script_list, int list_len)
 		}
 
 		if (time_to_wait(list, list_len, i))
-			wait_for_threads(pth_list, pth_aux, pth_output, status);
+			wait_for_all_threads(pth_list, pth_aux, pth_output, status);
+		else if ((pth_aux - pth_list) >= MAX_THREADS)
+			wait_for_thread(pth_list, pth_aux, pth_output, status);
 	}
 finalize:
 	free(pth_list);

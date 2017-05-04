@@ -66,7 +66,7 @@ test('Change init diff 2->4', filesystem_tests, args: ['a', '2', '4', '3'])
 test('Change init diff 2->5', filesystem_tests, args: ['a', '2', '5', '0'])
 test('Change init diff 5->2', filesystem_tests, args: ['a', '5', '2', '4'])
 test('Change init diff 3->4', filesystem_tests, args: ['a', '3', '4', '0'])
-test('Change init diff 2->S', filesystem_tests, args: ['a', '2', 'S', '1'])
+test('Change init diff 2->S', filesystem_tests, args: ['a', '2', 'S', '2'])
 test('Change init diff 2->9', filesystem_tests, args: ['a', '2', '9', '1'],
 	should_fail: true)
 test('Change init diff 9->2', filesystem_tests, args: ['a', '9', '2', '1'],
@@ -137,6 +137,12 @@ test('Env RUNLEVEL code[9] error',
 test('Unknown startup algorithm',
 	zeus,
 	args: ['no_algoritm'],
+	env: ['PREVLEVEL=N', 'RUNLEVEL=S'],
+        should_fail: true
+)
+test('Unknown startup algorithm S',
+	zeus,
+	args: ['S'],
 	env: ['PREVLEVEL=N', 'RUNLEVEL=S'],
         should_fail: true
 )
