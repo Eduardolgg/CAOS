@@ -33,6 +33,18 @@
 
 char *app_path;
 
+struct startup_item {
+	char *name;
+	int (*function)(struct runlevel*, struct runlevel*);
+};
+
+#define DEFAULT_STARTUP_ALGORITHM "default"
+struct startup_item startup_mode[] = {
+	{.name = "low_parallel", .function = &low_parallel_start},
+	{.name = "serial", .function = &serial_start},
+	{.name = DEFAULT_STARTUP_ALGORITHM, .function = &serial_start}
+};
+
 void print_usage()
 {
 	print_text_msg("%s", CAOS_BANNER);
@@ -53,9 +65,34 @@ void exit_invalid_runlevels(char prev_runlevel, char new_runlevel)
 	exit(1);
 }
 
+int (*get_startup_function(char *st_algorithm)) (struct runlevel*, struct runlevel*)
+{
+	struct startup_item *sm = startup_mode;
+	do {
+		if (strcmp(st_algorithm, sm->name) == 0)
+			break;
+		sm++;
+	} while (strcmp(sm->name, DEFAULT_STARTUP_ALGORITHM) != 0);
+	return sm->function;
+}
+
+int get_st_function(char *st_algorithm, struct startup_item *st_item)
+{
+	struct startup_item *item = startup_mode;
+	do {
+		if (strcmp(st_algorithm, item->name) == 0) {
+			*st_item = *item;
+			return 0;
+		}
+		item++;
+	} while (strcmp(item->name, DEFAULT_STARTUP_ALGORITHM) != 0);
+	return -1;
+}
+
 int main(int argc, char **argv)
 {
 	int init_errors;
+	struct startup_item item;
 	struct runlevel prev_runlevel; /* Previous runlevel */
 	struct runlevel new_runlevel;  /* Actual or new runlevel */
 
@@ -71,13 +108,15 @@ int main(int argc, char **argv)
 	if (IS_SYS_BOOT_START(prev_runlevel.code, new_runlevel.code))
 		PRINT_APP_INFO;
 
-	print_inf_msg("%s: swiching from runlevel[%c] to runlevel[%c]\n",
-	              APP_NAME, prev_runlevel.code, new_runlevel.code);
+	print_inf_msg("%s: Swiching from runlevel[%c] to runlevel[%c] - %s\n",
+	              APP_NAME, prev_runlevel.code, new_runlevel.code, argv[1]);
 
-	if (strcmp(argv[1], "low_parallel") == 0)
-		init_errors = low_parallel_start(&prev_runlevel, &new_runlevel);
-	else
-		init_errors = serial_start(&prev_runlevel, &new_runlevel);
+	if (get_st_function(argv[1], &item) != 0) {
+		init_errors = 1;
+		print_war_msg("%s is NOT a valid startup mode.", argv[1]);
+	}
+
+	init_errors |= item.function(&prev_runlevel, &new_runlevel);
 
 	if (init_errors)
 		print_err_msg("Error(s) detected, see log\n");
@@ -85,5 +124,5 @@ int main(int argc, char **argv)
 	free_runlevel_items(&prev_runlevel);
 	free_runlevel_items(&new_runlevel);
 
-	return 0;
+	return init_errors;
 }

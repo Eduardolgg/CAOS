@@ -106,57 +106,63 @@ test('No params or env',
 )
 test('No env but params',
 	zeus,
-	args: ['2'],
+	args: ['serial'],
 	env: [],
         should_fail: true
 )
 test('Init code[9] error',
 	zeus,
-	args: ['9'],
+	args: ['serial'],
 	env: ['PREVLEVEL=N', 'RUNLEVEL=9'],
         should_fail: true
 )
 test('Env PREVLEVEL code[9] error',
 	zeus,
-	args: ['2'],
+	args: ['serial'],
 	env: ['PREVLEVEL=9', 'RUNLEVEL=2'],
         should_fail: true
 )
 test('Env PREVLEVEL code[unknown] error',
 	zeus,
-	args: ['2'],
+	args: ['serial'],
 	env: ['PREVLEVEL=unknown', 'RUNLEVEL=2'],
         should_fail: true
 )
 test('Env RUNLEVEL code[9] error',
 	zeus,
-	args: ['2'],
+	args: ['serial'],
 	env: ['PREVLEVEL=N', 'RUNLEVEL=9'],
+        should_fail: true
+)
+test('Unknown startup algorithm',
+	zeus,
+	args: ['no_algoritm'],
+	env: ['PREVLEVEL=N', 'RUNLEVEL=S'],
         should_fail: true
 )
 test('Booting rcS scrips',
 	zeus,
-	args: ['S'],
+	args: ['serial'],
 	env: ['PREVLEVEL=N', 'RUNLEVEL=S']
 )
 test('Booting rc2 scrips',
 	zeus,
-	args: ['2'],
+	args: ['serial'],
 	env: ['PREVLEVEL=N', 'RUNLEVEL=2']
 )
 test('Switch runlevel, diferents scripts',
 	zeus,
-	args: ['3'],
+	args: ['serial'],
 	env: ['PREVLEVEL=2', 'RUNLEVEL=3']
 )
 test('Switch runlevel, same scripts',
 	zeus,
-	args: ['4'],
+	args: ['serial'],
 	env: ['PREVLEVEL=3', 'RUNLEVEL=4']
 )
 test('Switch runlevel, empty runlevel',
 	zeus,
-	args: ['5'],
+	args: ['serial'],
 	env: ['PREVLEVEL=3', 'RUNLEVEL=5']
 )
 test('LP Booting rcS scrips',
