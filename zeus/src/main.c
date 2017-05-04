@@ -91,7 +91,7 @@ int get_st_function(char *st_algorithm, struct startup_item *st_item)
 
 int main(int argc, char **argv)
 {
-	int init_errors;
+	int init_errors = 0;
 	struct startup_item item;
 	struct runlevel prev_runlevel; /* Previous runlevel */
 	struct runlevel new_runlevel;  /* Actual or new runlevel */
