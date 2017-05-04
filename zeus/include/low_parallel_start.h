@@ -23,4 +23,17 @@
 
 #include "runlevel_utils.h"
 
+/*
+ * Change from prev_level runlevel to new_level runlevel in parallel
+ * mode, is based on the order given in the startup scripts.
+ *
+ * If prev_level code is equal to RUNLEVEL_NONE, all scripts in
+ * new_runlevel are runned.
+ *
+ * The returned value is equal to zero if no error was detected, On
+ * error return 1.
+ *
+ * Note: This function send status information to the screen
+ * and to syslog.
+ */
 int low_parallel_start(struct runlevel *prev_level, struct runlevel *new_level);

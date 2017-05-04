@@ -99,64 +99,83 @@ void *fork_and_exec_script(void *script_name)
 	pthread_exit(script_name);
 }
 
-#define wait_for_threads(pth_list, pth_aux, pth_output, pth_error)           \
+#define wait_for_threads(pth_list, pth_aux, pth_output, status)              \
 ({                                                                           \
+	int pth_error;                                                       \
 	while (pth_aux != pth_list) {                                        \
 		pth_error = pthread_join(*--pth_aux, (void **) &pth_output); \
-		if (pth_error != 0)                                          \
+		if (pth_error != 0) {                                        \
 			print_current_error();                               \
+			status = -1;                                         \
+		}                                                            \
 	}                                                                    \
 })
 
 #define list_end(index, len) (index == list_len - 1)
-#define same_level(script_a, script_b) \
+
+#define same_level(script_a, script_b)        \
 	(strncmp(script_a, script_b, 3) == 0)
-#define time_to_wait(script_list, len, index) \
-	(list_end(index, len) || \
+
+#define time_to_wait(script_list, len, index)                                 \
+	(list_end(index, len) ||                                              \
 	(!list_end(index, len) && !same_level(script_list[index + 1]->d_name, \
 	                                      script_list[index]->d_name)))
-
 /*
  * Run all scripts listed on script_list located in dirname directory.
  *
- * During execution script_list and its contents are released.
+ * Return 0 on success, -1 on fail.
  */
 static
-void exec_all_scripts(char *dirname, struct dirent ***script_list, int list_len)
+int exec_all_scripts(char *dirname, struct dirent ***script_list, int list_len)
 {
-	//TODO: check malloc error.
-	pthread_t *pth_list = (pthread_t *) malloc(sizeof(pthread_t) *
-						   list_len);
-	pthread_t *pth_aux;
 	char *pth_output;
 	struct dirent **list = *script_list;
-	int i, error;
+	int i, error, status = 0;
+	pthread_t *pth_list, *pth_aux;
 
+	pth_list = (pthread_t *) malloc(sizeof(pthread_t) * list_len);
 	pth_aux = pth_list;
 
-	if (chdir(dirname)) {
+	if (!pth_list || chdir(dirname)) {
 		print_current_error();
-		exit(1);
+		status = -1;
+		goto finalize;
 	}
-
-	if (list_len < 1)
-		return;
 
 	for (i = 0; i < list_len; i++) {
 		error = pthread_create(pth_aux++, NULL,
 		                       fork_and_exec_script,
 		                       list[i]->d_name);
+		if (error != 0) {
+			print_current_error();
+			status = -1;
+		}
 
 		if (time_to_wait(list, list_len, i))
-			wait_for_threads(pth_list, pth_aux, pth_output, error);
+			wait_for_threads(pth_list, pth_aux, pth_output, status);
 	}
+finalize:
 	free(pth_list);
+	return status;
 }
 
+/*
+ * Change from prev_level runlevel to new_level runlevel in parallel
+ * mode, is based on the order given in the startup scripts.
+ *
+ * If prev_level code is equal to RUNLEVEL_NONE, all scripts in
+ * new_runlevel are runned.
+ *
+ * The returned value is equal to zero if no error was detected, On
+ * error return 1.
+ *
+ * Note: This function send status information to the screen
+ * and to syslog.
+ */
 int low_parallel_start(struct runlevel *prev_level, struct runlevel *new_level)
 {
 	struct dirent **script_list;
-	int list_len;
+	int list_len, exec_output;
 
 	if (IS_SYS_BOOT(prev_level->code))
 		list_len = get_start_init_scripts(new_level->dir,
@@ -169,7 +188,7 @@ int low_parallel_start(struct runlevel *prev_level, struct runlevel *new_level)
 		return 1;
 	}
 
-	exec_all_scripts(new_level->dir, &script_list, list_len);
+	exec_output = exec_all_scripts(new_level->dir, &script_list, list_len);
 	free_script_llist(&script_list, list_len);
-	return 0;
+	return exec_output;
 }

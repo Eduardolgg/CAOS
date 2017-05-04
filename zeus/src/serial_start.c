@@ -102,21 +102,24 @@ void fork_and_exec_script(char *script_name)
  * Run all scripts listed on script_list located in dirname directory.
  *
  * During execution script_list and its contents are released.
+ *
+ * Return 0 on success, -1 on fail.
  */
 static
-void exec_all_scripts(char *dirname, struct dirent ***script_list, int list_len)
+int exec_all_scripts(char *dirname, struct dirent ***script_list, int list_len)
 {
 	struct dirent **list = *script_list;
 	int i;
 	if (chdir(dirname)) {
 		print_current_error();
-		exit(1);
+		return -1;
 	}
 	for (i = 0; i < list_len; i++) {
 		fork_and_exec_script(list[i]->d_name);
 		free(list[i]);
 	}
 	free(list);
+	return 0;
 }
 
 /*
@@ -134,7 +137,7 @@ void exec_all_scripts(char *dirname, struct dirent ***script_list, int list_len)
 int serial_start(struct runlevel *prev_level, struct runlevel *new_level)
 {
 	struct dirent **script_list;
-	int list_len;
+	int list_len, exec_output;
 
 	if (IS_SYS_BOOT(prev_level->code))
 		list_len = get_start_init_scripts(new_level->dir,
@@ -147,9 +150,9 @@ int serial_start(struct runlevel *prev_level, struct runlevel *new_level)
 		return 1;
 	}
 
-	exec_all_scripts(new_level->dir, &script_list, list_len);
+	exec_output = exec_all_scripts(new_level->dir, &script_list, list_len);
 	// Actually exec_all_scripts free all script_list memory...
 	// I'm thinking the next line.
 	// free_script_llist(&script_list, list_len);
-	return 0;
+	return exec_output;
 }
