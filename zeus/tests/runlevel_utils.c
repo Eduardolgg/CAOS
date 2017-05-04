@@ -10,8 +10,8 @@ void print_usage(char *appname)
 
 int main(int argc, char **argv)
 {
-	struct runlevel *prevrunlevel,
-	                *newrunlevel;
+	struct runlevel *prevrunlevel = NULL,
+	                *newrunlevel = NULL;
 	int result;
 
 	if (argc < 2)

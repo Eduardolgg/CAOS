@@ -6,7 +6,7 @@ int main(int argc, char **argv)
 	struct script_list script_list;
 	int list_len,
 	    expected_list_len,
-	    i, result;
+	    i, result = 1;
 
 	if (argc < 5) {
 		print_err_msg("Usage: %s prev_runlevel act_runlevel "
@@ -16,14 +16,14 @@ int main(int argc, char **argv)
 			      " prev to act.\n", argv[0]);
 		return 1;
 	}
-		struct runlevel prevlevel = {
-			.code = argv[2][0],
-			.dir = get_script_directory(argv[2][0])
-		};
-		struct runlevel newlevel = {
-			.code = argv[3][0],
-			.dir = get_script_directory(argv[3][0])
-		};
+	struct runlevel prevlevel = {
+		.code = argv[2][0],
+		.dir = get_script_directory(argv[2][0])
+	};
+	struct runlevel newlevel = {
+		.code = argv[3][0],
+		.dir = get_script_directory(argv[3][0])
+	};
 	switch(argv[1][0]) {
 	case 'a':
 		expected_list_len = argv[4][0] - '0';
