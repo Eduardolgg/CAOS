@@ -92,8 +92,8 @@ int print_msg(char *format, char *color, ...);
 /*
  * Print CAOS init suite information
  */
-#define PRINT_APP_INFO	                         \
-({                                               \
-	print_inf_msg("System is boot up\n");    \
-	print_text_msg(CAOS_BANNER);             \
+#define PRINT_APP_INFO	                                      \
+({                                                            \
+	print_inf_msg("%s: System is boot up\n", CAOS_INFO);  \
+	print_text_msg(CAOS_BANNER);                          \
 })
