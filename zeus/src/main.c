@@ -31,15 +31,24 @@
 #include "serial_start.h"
 #include "low_parallel_start.h"
 
-char *app_path;
+#define DEFAULT_STARTUP_ALGORITHM "default"
 
-struct startup_item {
+char *app_path;
+/*
+ * Can store algorithm name and startup function pointer.
+ */
+struct startup_alg {
 	char *name;
 	int (*function)(struct runlevel*, struct runlevel*);
 };
 
-#define DEFAULT_STARTUP_ALGORITHM "default"
-struct startup_item startup_mode[] = {
+/*
+ * List of valid startup algorithms and functions.
+ *
+ * If you want to add a new algorithm add new name and function
+ * pointer to these list.
+ */
+struct startup_alg startup_mode[] = {
 	{.name = "low_parallel", .function = &low_parallel_start},
 	{.name = "serial", .function = &serial_start},
 	{.name = DEFAULT_STARTUP_ALGORITHM, .function = &serial_start}
@@ -65,34 +74,40 @@ void exit_invalid_runlevels(char prev_runlevel, char new_runlevel)
 	exit(1);
 }
 
-int (*get_startup_function(char *st_algorithm)) (struct runlevel*, struct runlevel*)
-{
-	struct startup_item *sm = startup_mode;
-	do {
-		if (strcmp(st_algorithm, sm->name) == 0)
-			break;
-		sm++;
-	} while (strcmp(sm->name, DEFAULT_STARTUP_ALGORITHM) != 0);
-	return sm->function;
-}
+#define MATCH_ALGORITHM(alg, item) strcmp(alg, item->name) == 0
 
-int get_st_function(char *st_algorithm, struct startup_item *st_item)
+/*
+ * We are at the end of the list if item points to DEFAULT_STARTUP_ALGORITHM
+ */
+#define NOT_LIST_END(item) strcmp(item->name, DEFAULT_STARTUP_ALGORITHM) != 0
+
+/*
+ * Find st_algorithm in startup_mode list.
+ *
+ * If st_algorithm is found in startup_mode list, it is stored in st_item
+ * with startup function and return zero. If st_algorithm is not found
+ * st_item is set with DEFAULT_STARTUP_ALGORITHM and -1 is returned.
+ */
+int get_startup_function(char *st_algorithm, struct startup_alg *st_item)
 {
-	struct startup_item *item = startup_mode;
+	int status = -1;
+	struct startup_alg *item = startup_mode;
 	do {
-		if (strcmp(st_algorithm, item->name) == 0) {
-			*st_item = *item;
-			return 0;
+		if (MATCH_ALGORITHM(st_algorithm, item)) {
+			status = 0;
+			break;
 		}
 		item++;
-	} while (strcmp(item->name, DEFAULT_STARTUP_ALGORITHM) != 0);
-	return -1;
+	} while (NOT_LIST_END(item));
+
+	*st_item = *item;
+	return status;
 }
 
 int main(int argc, char **argv)
 {
 	int init_errors = 0;
-	struct startup_item item;
+	struct startup_alg st_mode;    /* Startup mode item */
 	struct runlevel prev_runlevel; /* Previous runlevel */
 	struct runlevel new_runlevel;  /* Actual or new runlevel */
 
@@ -111,12 +126,12 @@ int main(int argc, char **argv)
 	print_inf_msg("%s: Swiching from runlevel[%c] to runlevel[%c] - %s\n",
 	              APP_NAME, prev_runlevel.code, new_runlevel.code, argv[1]);
 
-	if (get_st_function(argv[1], &item) != 0) {
+	if (get_startup_function(argv[1], &st_mode) != 0) {
 		init_errors = 1;
 		print_war_msg("%s is NOT a valid startup mode.", argv[1]);
 	}
 
-	init_errors |= item.function(&prev_runlevel, &new_runlevel);
+	init_errors |= st_mode.function(&prev_runlevel, &new_runlevel);
 
 	if (init_errors)
 		print_err_msg("Error(s) detected, see log\n");
