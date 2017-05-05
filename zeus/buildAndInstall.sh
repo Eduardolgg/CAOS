@@ -4,4 +4,4 @@
 cd ./build
 ninja clean
 ninja
-ninja install
+sudo ninja install
