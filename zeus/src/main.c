@@ -128,7 +128,8 @@ int main(int argc, char **argv)
 
 	if (get_startup_function(argv[1], &st_mode) != 0) {
 		init_errors = 1;
-		print_war_msg("%s is NOT a valid startup mode.", argv[1]);
+		print_war_msg("%s is NOT a valid startup mode. Using %s\n",
+			      argv[1], st_mode.name);
 	}
 
 	init_errors |= st_mode.function(&prev_runlevel, &new_runlevel);
