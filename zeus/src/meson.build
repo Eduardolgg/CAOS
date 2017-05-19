@@ -9,5 +9,6 @@ zeus = executable(
 	include_directories: inc,
 	install: true,
 	install_dir: '/sbin',
-	dependencies: thread_dep
+	dependencies: thread_dep,
+	link_args: '-lutil'
 )
