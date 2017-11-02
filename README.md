@@ -10,6 +10,11 @@ To build CAOS you need installed:
   * ninja version 1.7.2 or above
   * gcc version 4.9.2 or above
   
+Screenshots
+-------------
+You can see some Screenshots at: 
+ * https://drive.google.com/drive/folders/1NuhqPsTQoIqtLTdFoD41WpOgNo2UrScT
+  
 How to build and install
 --------------------------
 
