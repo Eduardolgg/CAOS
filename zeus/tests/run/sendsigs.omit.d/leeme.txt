@@ -1,0 +1,1 @@
+This directory simulates the /sendsigs.omit.d directory on debug configuration.

@@ -1,7 +1,7 @@
 thread_dep = dependency('threads')
 
 sources = ['main.c', 'log.c', 'runlevel_utils.c', 'filesystem.c',
-           'serial_start.c', 'low_parallel_start.c'
+           'run.c', 'serial_start.c', 'low_parallel_start.c'
 ]
 zeus = executable(
 	'zeus',

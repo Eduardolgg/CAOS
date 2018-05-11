@@ -68,7 +68,7 @@ int print_msg(char *format, char *color, ...);
 #define print_current_error_msg(format, ...)        \
 ({      /* TODO: Too long for a macro? :-/ */       \
 	print_msg(format, C_RED, ##__VA_ARGS__);    \
-	print_msg(". %s", C_RED, strerror(errno));  \
+	print_msg(". %s\n", C_RED, strerror(errno));  \
 	openlog(APP_NAME, LOG_ODELAY, LOG_DAEMON);  \
 	syslog(LOG_ERR, format, ##__VA_ARGS__);     \
 	closelog();                                 \

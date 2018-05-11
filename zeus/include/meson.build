@@ -7,10 +7,12 @@ if buildtype == 'debug' or buildtype == 'debugoptimized'
 	conf.set('rcx_directory', '../tests/fake_init.d/rcX.d')
 	conf.set('rcx_xchar_location', '23')
 	conf.set('rcx_buffer_len', '27')
+	conf.set('run_directory', '../tests/run')
 else
 	conf.set('rcx_directory', '/etc/rcX.d')
 	conf.set('rcx_xchar_location', '7')
 	conf.set('rcx_buffer_len', '11')
+	conf.set('run_directory', '/run')
 endif
 
 configure_file(
