@@ -22,11 +22,13 @@
  */
 #include <sys/types.h>
 #include <stdlib.h>
+#include <sys/stat.h>
 #include <unistd.h>
 #include <sys/wait.h>
 #include <dirent.h>
 #include <string.h>
 #include <pthread.h>
+#include <string.h>
 
 #include <pty.h>
 #include <utmp.h>
@@ -78,10 +80,6 @@ void wait_for_child(pid_t pid, char *script_name)
 		print_err_msg("%s: exit code [%i]", script_name,
 			      WEXITSTATUS(status));
 }
-
-#include <sys/types.h>
-       #include <sys/stat.h>
-       #include <unistd.h>
 
 static
 void *fork_and_exec_script(void *thread_data)
@@ -146,6 +144,7 @@ void *fork_and_exec_script(void *thread_data)
 	pthread_exit(thr_data->script_name);
 }
 
+
 #define wait_for_thread(pth_list, pth_aux, pth_output, status)           \
 ({                                                                       \
 	int pth_error = pthread_join((--pth_aux)->thread, (void **) &pth_output); \
@@ -153,7 +152,8 @@ void *fork_and_exec_script(void *thread_data)
 		print_current_error();                                   \
 		status = -1;              \
 	}  else {                     \
-		char wft_buf[256];\
+		char wft_buf[256] = "";\
+		memset(wft_buf, '\0', 256);\
 		int wft_rb;\
 		do { \
 			wft_rb = read(pth_aux->fd, wft_buf, 255);\
