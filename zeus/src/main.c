@@ -57,7 +57,7 @@ struct startup_alg startup_mode[] = {
 void print_usage()
 {
 	print_text_msg("%s", CAOS_BANNER);
-	printf("Welcome to %s\n", CAOS_SHORT_DESC);
+	printf("Welcome to %s\n", CAOS_INFO);
 	printf("Usage: %s {0|1|2|3|4|5|6|S}\n", app_path);
 }
 
