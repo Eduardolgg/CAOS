@@ -35,6 +35,10 @@
 # Meson files and directories
 build
 
+# Ninja files
+.ninja_deps
+.ninja_log
+
 # Vim files
 *.swp
 
