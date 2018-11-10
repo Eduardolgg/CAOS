@@ -6,27 +6,27 @@ Actually CAOS is only testet on devuan and only have a replacement for rc (/etc/
 Build requirements
 -------------
 To build CAOS you need installed:
-  * meson version 0.39.1 or above
+  * meson version 0.39.1 or above (To install meson see: http://mesonbuild.com/Getting-meson.html)
   * ninja version 1.7.2 or above
   * gcc version 4.9.2 or above
-  
+
 Screenshots
 -------------
-You can see some Screenshots at: 
+You can see some Screenshots at:
  * https://drive.google.com/drive/folders/1NuhqPsTQoIqtLTdFoD41WpOgNo2UrScT
-  
+
 How to build and install
 --------------------------
 
 Yo can run the script buildAndInstall.sh or follow this steps:
 
-    meson
+    meson build
     ./setReleaseMode.sh
     cd ./build
     ninja clean
     ninja
     sudo ninja install
-    
+
 Configuring your inittab
 --------------------------
 replace your rc init lines by zeus, for example:
@@ -36,7 +36,7 @@ replace your rc init lines by zeus, for example:
     ...
 
 The tag serial is the start algorithm you can use serial or low_parallel, but low_parallel is still under development
-    
+
 How to run tests
 ------------------
 Yo can run the script buildAndTestAll.sh or follow this steps:
@@ -48,3 +48,14 @@ Yo can run the script buildAndTestAll.sh or follow this steps:
     ninja clean
     ninja
     ninja test
+
+How to build and run examples
+-------------------------------
+To build the examples go to examples directory and run:
+
+    meson build
+    cd ./build
+    ninja clean
+    ninja
+    Now go to src subdir in build directory -> cd src
+    Run the examples do you want.
