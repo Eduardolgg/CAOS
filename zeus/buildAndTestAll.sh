@@ -12,5 +12,9 @@ ninja coverage-text
 rm -rf ./meson-logs/coveragereport/
 ninja coverage-html
 
-#mesontest --wrap=valgrind
-mesontest --setup=valgrind_trace_children
+if hash mesontest 2>/dev/null; then
+	#mesontest --wrap=valgrind
+	mesontest --setup=valgrind_trace_children
+else
+	meson test --setup=valgrind_trace_children
+fi

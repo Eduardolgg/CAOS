@@ -9,6 +9,8 @@ To build CAOS you need installed:
   * meson version 0.39.1 or above (To install meson see: http://mesonbuild.com/Getting-meson.html)
   * ninja version 1.7.2 or above
   * gcc version 4.9.2 or above
+  * gcovr (OPTIONAL for tests)
+  * valgind (OPTIONAL for tests)
 
 Screenshots
 -------------

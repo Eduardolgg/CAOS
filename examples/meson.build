@@ -1,6 +1,6 @@
 project('examples', 'c',
 	license: 'GPLV2',
-	meson_version: '>=0.39.1',
+	meson_version: '>=0.37.0',
 	version: '0.0.0'
 )
 

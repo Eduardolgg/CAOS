@@ -1,4 +1,9 @@
-project('Zeus', 'c', license: 'GPLV2', version: '0.1.1b')
+project('Zeus', 'c', 
+	license: 'GPLV2',
+	meson_version: '>=0.39.1',
+	version: '0.1.1b'
+)
+
 buildtype = get_option('buildtype')
 
 #add_global_arguments('-lutil',language : 'c')
