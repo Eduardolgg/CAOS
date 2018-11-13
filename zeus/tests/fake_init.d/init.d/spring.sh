@@ -20,25 +20,25 @@ timestamp=$(date)
 case "$1" in
     start)
         echo "Starting $name"
-		sleep 0.8
-		echo "Started $name"
-		echo "$timestamp Starting $name" >> $stdout_log
+        sleep 0.8
+        echo "Started $name"
+        echo "$timestamp Starting $name" >> $stdout_log
     ;;
     stop)
-        echo -n "Stopping $name.."
-		echo "$timestamp Stoping $name" >> $stdout_log
+        echo "Stopping $name.."
+        echo "$timestamp Stoping $name" >> $stdout_log
     ;;
     restart)
-    $0 stop
-    $0 start
+        $0 stop
+        $0 start
     ;;
     status)
         echo "Running"
-		echo "$timestamp Status $name" >> $stdout_log
+        echo "$timestamp Status $name" >> $stdout_log
     ;;
     *)
-	echo "Usage: $0 {start|stop|restart|status}"
-    	exit 1
+        echo "Usage: $0 {start|stop|restart|status}"
+        exit 1
     ;;
 esac
 

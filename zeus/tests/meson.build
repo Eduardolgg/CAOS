@@ -186,3 +186,8 @@ test('LP Switch runlevel, diferents scripts',
 	args: ['low_parallel'],
 	env: ['PREVLEVEL=2', 'RUNLEVEL=3']
 )
+test('LP too many scripts',
+	zeus,
+	args: ['low_parallel'],
+	env: ['PREVLEVEL=N', 'RUNLEVEL=6']
+)
