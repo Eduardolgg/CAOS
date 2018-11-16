@@ -67,7 +67,7 @@ void wait_for_child(pid_t pid, char *script_name)
 	}
 
 	if (NORMAL_EXIT(status))
-		syslog_info("%s ran correctly.", script_name);
+		syslog_info("S: %s ran correctly.", script_name);
 	else
 		print_current_error_msg("%s: abnormally ended.",
 					script_name);

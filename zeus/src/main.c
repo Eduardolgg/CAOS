@@ -140,5 +140,11 @@ int main(int argc, char **argv)
 	free_runlevel_items(&prev_runlevel);
 	free_runlevel_items(&new_runlevel);
 
+#ifdef DEBUG
+	if (!IS_SYS_BOOT_START(prev_runlevel.code, new_runlevel.code)) {
+		print_dbg_msg("ZEUS: The work is done, I must rest.\n");
+	}
+#endif
+
 	return init_errors;
 }

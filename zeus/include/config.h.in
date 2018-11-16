@@ -36,6 +36,7 @@
  */
 #define APP_NAME "@app_name@"
 #mesondefine USE_COLORS
+#mesondefine DEBUG
 
 /*
  * RC configuration.

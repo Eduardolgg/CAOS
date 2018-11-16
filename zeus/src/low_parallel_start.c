@@ -71,14 +71,33 @@ void wait_for_child(pid_t pid, char *script_name)
 	}
 
 	if (NORMAL_EXIT(status))
-		syslog_info("%s ran correctly.", script_name);
+		syslog_info("LP: %s ran correctly.", script_name);
 	else
-		print_current_error_msg("%s: abnormally ended.",
+		print_current_error_msg("%s: abnormally ended.\n",
 					script_name);
 
 	if (NORMAL_EXIT(status) && ERROR_EXIT(status))
 		print_err_msg("%s: exit code [%i]", script_name,
 			      WEXITSTATUS(status));
+}
+
+// TODO: try to use for interactive start scripts
+static
+void send_pty_io_to_standar_io(struct proc_info *thr_data)
+{
+	struct stat stat_info;
+
+	if (stat("/dev/pts", &stat_info) != -1) {
+		if (dup2(thr_data->fd_slave, STDIN_FILENO) != STDIN_FILENO)
+			print_current_error_msg("Error dup slave fd to stdin\n");
+		if (dup2(thr_data->fd, STDOUT_FILENO) != STDOUT_FILENO)
+			print_current_error_msg("Error dup slave fd to stdout\n");
+		if (dup2(thr_data->fd, STDERR_FILENO) != STDERR_FILENO)
+			print_current_error_msg("Error dup slave fd to stderr\n");
+
+		close(thr_data->fd);
+		close(thr_data->fd_slave);
+	}
 }
 
 static
@@ -90,18 +109,13 @@ void *fork_and_exec_script(void *thread_data)
 
 	thr_data = (struct proc_info *) thread_data;
 
-	//test
-	struct termios *termios_p = (struct termios *) malloc(sizeof(struct
-								     termios));
-	if (tcgetattr(0, termios_p))
-		print_current_error_msg("Error al obtener el termios por defecto\n");
-	//endtest
-
-	//if (stat("/dev/pts", &s) != -1)
-		//pid = forkpty(&(thr_data->fd), NULL, termios_p, NULL);
-	//	openpty(&(thr_data->fd),&(thr_data->fd_slave), NULL, NULL, NULL);
-	//else
+	if (stat("/dev/pts", &s) != -1 && stat("/dev/ptmx", &s) != -1)
+		pid = forkpty(&(thr_data->fd), NULL, NULL, NULL);
+	else {
+		print_current_error_msg("Console unavailable %s\n",
+		                                         thr_data->script_name);
 		pid = fork();
+	}
 
 	switch (pid) {
 	case 0:
@@ -110,67 +124,55 @@ void *fork_and_exec_script(void *thread_data)
 		(void)signal(SIGTERM,  SIG_IGN);
 		(void)signal(SIGTSTP,  SIG_IGN);
 		(void)signal(SIGCHLD, SIG_DFL);
-		if (strcmp(thr_data->script_name, "K02sendsigs")) {
-
-			openpty(&(thr_data->fd),&(thr_data->fd_slave), NULL, NULL, NULL);
-			login_tty(thr_data->fd_slave);
-		}
-/*
-		if (stat("/dev/pts", &s) != -1) {
-			if (dup2(thr_data->fd_slave, STDIN_FILENO) != STDIN_FILENO)
-				printf("dup2 error to stdin");
-			if (dup2(thr_data->fd_slave, STDOUT_FILENO) != STDOUT_FILENO)
-				printf("dup2 error to stdout");
-			if (dup2(thr_data->fd_slave, STDERR_FILENO) != STDERR_FILENO)
-				printf("dup2 error to stderr");
-
-			close(thr_data->fd);
-			close(thr_data->fd_slave);
-		}*/
 
 		exec_script(thr_data->script_name);
-		/* If we got here something went wrong. */
-		print_current_error_msg("Error to execute script %s",
+		// If we got here something went wrong.
+		print_current_error_msg("Error to execute script %s\n",
 		                        thr_data->script_name);
 		exit(1);
 		break;
 	case -1:
-		print_current_error_msg("Fork error to %s",
+		print_current_error_msg("Fork error to %s\n",
 		                        thr_data->script_name);
 		break;
 	default:
 		wait_for_child(pid, thr_data->script_name);
+		fsync(thr_data->fd_slave);
 	}
 	pthread_exit(thr_data->script_name);
 }
 
 
-#define wait_for_thread(pth_list, pth_aux, pth_output, status)           \
-({                                                                       \
-	int pth_error = pthread_join((--pth_aux)->thread, (void **) &pth_output); \
-	if (pth_error != 0) {                                            \
-		print_current_error();                                   \
-		status = -1;              \
-	}  else {                     \
-		char wft_buf[256] = "";\
-		memset(wft_buf, '\0', 256);\
-		int wft_rb;\
-		do { \
-			wft_rb = read(pth_aux->fd, wft_buf, 255);\
-			wft_buf[wft_rb] = '\0';\
-			printf("%s", wft_buf);\
-		} while (wft_rb == 255);\
-		close(pth_aux->fd);\
-	}\
-})
+void wait_for_thread(struct proc_info **process,
+			    int status)
+{
+	struct proc_info *pth_aux = *process;
+	int pth_error = pthread_join((--pth_aux)->thread, NULL);
+	if (pth_error != 0) {
+		print_current_error();
+		status = -1;
+	}  else {
+		int wft_rb;
+		char wft_buf[256];
+		do {
+			memset(wft_buf, '\0', sizeof(wft_buf));
+			wft_rb = read(pth_aux->fd, wft_buf, sizeof(wft_buf)-1);
+			printf("%s", wft_buf);
+		} while (wft_rb > 0);
+		close(pth_aux->fd);
+	}
+	*process = pth_aux;
+}
 
 
-#define wait_for_all_threads(pth_list, pth_aux, pth_output, status)          \
-({                                                                           \
-	while (pth_aux != pth_list) {                                        \
-		wait_for_thread(pth_list, pth_aux, pth_output, status);      \
-	}                                                                    \
-})
+void wait_for_all_threads(struct proc_info *pth_list,
+				 struct proc_info **pth_aux,
+				 int status)
+{
+	while (*pth_aux != pth_list) {
+		wait_for_thread(pth_aux, status);
+	}
+}
 
 #define list_end(index, len) (index == list_len - 1)
 
@@ -190,7 +192,6 @@ void *fork_and_exec_script(void *thread_data)
 static
 int exec_all_scripts(char *dirname, struct dirent ***script_list, int list_len)
 {
-	char *p_output;
 	struct dirent **list = *script_list;
 	int i, error, status = 0;
 	struct proc_info *p_list, *p_aux;
@@ -216,14 +217,15 @@ int exec_all_scripts(char *dirname, struct dirent ***script_list, int list_len)
 		}
 
 		if (time_to_wait(list, list_len, i))
-			wait_for_all_threads(p_list, p_aux, p_output, status);
+			wait_for_all_threads(p_list, &p_aux, status);
 		else if ((p_aux - p_list) >= MAX_THREADS)
-			wait_for_thread(p_list, p_aux, p_output, status);
+			wait_for_thread(&p_aux, status);
+#ifdef DEBUG
 		struct proc_info *aa;
 		aa = p_aux;
-		while (aa-- != p_list) {
-			printf("whaiting for %s\n", aa->script_name);
-		}
+		while (aa-- != p_list)
+			print_dbg_msg("whaiting for %s\n", aa->script_name);
+#endif
 
 	}
 finalize:

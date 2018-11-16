@@ -36,12 +36,14 @@
 	#define C_GREEN "\E[32m"
 	#define C_YELLOW "\E[33m"
 	#define C_RED "\E[31m"
+	#define C_PURPLE "\E[35m"
 #else
 	#define C_RESET ""
 	#define C_GRAY ""
 	#define C_GREEN ""
 	#define C_YELLOW ""
 	#define C_RED ""
+	#define C_PURPLE ""
 #endif
 
 /*
@@ -64,6 +66,8 @@ int print_msg(char *format, char *color, ...);
 #define print_war_msg(format, ...) print_msg(format, C_YELLOW, ##__VA_ARGS__);
 
 #define print_err_msg(format, ...) print_msg(format, C_RED, ##__VA_ARGS__);
+
+#define print_dbg_msg(format, ...) print_msg(format, C_PURPLE, ##__VA_ARGS__);
 
 #define print_current_error_msg(format, ...)        \
 ({      /* TODO: Too long for a macro? :-/ */       \

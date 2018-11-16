@@ -45,10 +45,10 @@ struct runlevel {
  * Return true if system is booting, false otherwise.
  */
 #define IS_SYS_BOOT_START(prevcode, newcode) \
-	prevcode == RUNLEVEL_NONE && newcode == RUNLEVEL_START
+	(prevcode == RUNLEVEL_NONE && newcode == RUNLEVEL_START)
 
 #define IS_SYS_BOOT(prevcode) \
-	prevcode == RUNLEVEL_NONE
+	(prevcode == RUNLEVEL_NONE)
 
 /*
  * Check for valid runlevels.
