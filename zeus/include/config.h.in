@@ -37,6 +37,9 @@
 #define APP_NAME "@app_name@"
 #mesondefine USE_COLORS
 #mesondefine DEBUG
+#define SENDSIGS_OMIT_DIR "@run_directory@/sendsigs.omit.d/"
+// TODO: find meson define exec name
+#define PID_FILES_DIR "@run_directory@/zeus/"
 
 /*
  * RC configuration.

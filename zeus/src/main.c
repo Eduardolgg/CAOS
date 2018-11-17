@@ -22,14 +22,16 @@
  *    <http://www.gnu.org/licenses/>
  */
 
+#include <sys/types.h>
 #include <unistd.h>
 #include <stdlib.h>
 
 #include "config.h"
 #include "log.h"
+#include "low_parallel_start.h"
+#include "run.h"
 #include "runlevel_utils.h"
 #include "serial_start.h"
-#include "low_parallel_start.h"
 
 #define DEFAULT_STARTUP_ALGORITHM "default"
 
@@ -126,6 +128,8 @@ int main(int argc, char **argv)
 	print_inf_msg("%s: Swiching from runlevel[%c] to runlevel[%c] - %s\n",
 	              APP_NAME, prev_runlevel.code, new_runlevel.code, argv[1]);
 
+	make_killall_ignore_me();
+
 	if (get_startup_function(argv[1], &st_mode) != 0) {
 		init_errors = 1;
 		print_war_msg("%s is NOT a valid startup mode. Using %s\n",
@@ -139,12 +143,12 @@ int main(int argc, char **argv)
 
 	free_runlevel_items(&prev_runlevel);
 	free_runlevel_items(&new_runlevel);
+	remove_killall_ignore();
 
 #ifdef DEBUG
 	if (!IS_SYS_BOOT_START(prev_runlevel.code, new_runlevel.code)) {
 		print_dbg_msg("ZEUS: The work is done, I must rest.\n");
 	}
 #endif
-
 	return init_errors;
 }

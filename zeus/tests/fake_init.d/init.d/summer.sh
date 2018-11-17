@@ -25,7 +25,7 @@ case "$1" in
         echo "$timestamp Starting $name" >> $stdout_log
     ;;
     stop)
-        echo "Stopping $name.."
+        echo "Stopping $name"
         echo "$timestamp Stoping $name" >> $stdout_log
     ;;
     restart)
