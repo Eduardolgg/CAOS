@@ -94,13 +94,17 @@ void create_pid_file_and_kill_ignore(char *file_name, int pid,
 	add_kill_ignore_link(info);
 }
 
-void delete_pid_file_and_kill_ignore(struct run_info *info)
+void delete_pid_file_and_kill_ignore(char *file_name, struct run_info *info)
 {
-	// TODO: hacer esto.
-	print_err_msg("Método delete_pid_file_and_kill_ignore no implementado");
+	info->file_name = file_name;
+	info->pid_file_path = create_file_path(PID_FILES_DIR, info);
+	print_err_msg("file path [%s]\n", info->pid_file_path);
+	info->ignore_link_path = create_file_path(SENDSIGS_OMIT_DIR, info);
+	print_err_msg("file path [%s]\n", info->ignore_link_path);
+	delete_pid_file(info);
+	delete_kill_ignore_link(info);
 }
 
-// TODO: Review function name.
 void make_killall_ignore_me()
 {
 	struct run_info *info = (struct run_info *)
@@ -113,6 +117,9 @@ void make_killall_ignore_me()
 
 void remove_killall_ignore()
 {
-	//TODO: hacer esto.
-	print_err_msg("Método no implementado, remove_killall_ignore()");
+	struct run_info *info = (struct run_info *)
+		malloc(sizeof(struct run_info));
+	delete_pid_file_and_kill_ignore("zeus", info);
+	free(info->pid_file_path);
+	free(info);
 }
