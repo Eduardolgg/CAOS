@@ -77,7 +77,7 @@ void wait_for_child(pid_t pid, char *script_name)
 					script_name);
 
 	if (NORMAL_EXIT(status) && ERROR_EXIT(status))
-		print_err_msg("%s: exit code [%i]", script_name,
+		print_err_msg("%s: exit code [%i]\n", script_name,
 			      WEXITSTATUS(status));
 }
 
