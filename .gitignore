@@ -44,3 +44,4 @@ build
 
 # Application temp files.
 zeus/tests/fake_init.d/log/
+zeus/tests/run/
