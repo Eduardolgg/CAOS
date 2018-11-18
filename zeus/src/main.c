@@ -37,7 +37,7 @@
 
 char *app_path;
 /*
- * Can store algorithm name and startup function pointer.
+ * Store algorithm name and startup function pointer.
  */
 struct startup_alg {
 	char *name;
@@ -61,6 +61,15 @@ void print_usage()
 	print_text_msg("%s", CAOS_BANNER);
 	printf("Welcome to %s\n", CAOS_INFO);
 	printf("Usage: %s {0|1|2|3|4|5|6|S}\n", app_path);
+}
+
+static inline void print_normal_end_msg_if_debug(struct runlevel* prev_runlevel,
+					  struct runlevel* new_runlevel) {
+#ifdef DEBUG
+	if (!IS_SYS_BOOT_START(prev_runlevel->code, new_runlevel->code)) {
+		print_dbg_msg("ZEUS: The work is done, I must rest.\n");
+	}
+#endif
 }
 
 /*
@@ -145,10 +154,7 @@ int main(int argc, char **argv)
 	free_runlevel_items(&new_runlevel);
 	remove_killall_ignore();
 
-#ifdef DEBUG
-	if (!IS_SYS_BOOT_START(prev_runlevel.code, new_runlevel.code)) {
-		print_dbg_msg("ZEUS: The work is done, I must rest.\n");
-	}
-#endif
+	print_normal_end_msg_if_debug(&prev_runlevel, &new_runlevel);
+
 	return init_errors;
 }
