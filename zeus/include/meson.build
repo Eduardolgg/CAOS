@@ -3,7 +3,7 @@ conf = configuration_data()
 conf.set('version', meson.project_version())
 conf.set('app_name', meson.project_name())
 conf.set('USE_COLORS', true)
-conf.set('DEBUG', true)
+conf.set('DEBUG', false)
 if buildtype == 'debug' or buildtype == 'debugoptimized'
 	conf.set('rcx_directory', '../tests/fake_init.d/rcX.d')
 	conf.set('rcx_xchar_location', '23')
