@@ -43,5 +43,5 @@ build
 *.swp
 
 # Application temp files.
-zeus/tests/fake_init.d/log/
+zeus/tests/fake_etc/log/
 zeus/tests/run/
