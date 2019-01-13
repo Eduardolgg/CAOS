@@ -42,6 +42,13 @@
 #define STOP "stop"
 
 static
+int is_virtual_terminal_available() {
+	struct stat s;
+
+	return stat("/dev/pts", &s) != -1 && stat("/dev/ptmx", &s) != -1;
+}
+
+static
 void exec_script(char *script_name)
 {
 	switch (script_name[0]) {
@@ -104,12 +111,13 @@ static
 void *fork_and_exec_script(void *thread_data)
 {
 	pid_t pid;
-	struct stat s;
 	struct proc_info *thr_data;
 
 	thr_data = (struct proc_info *) thread_data;
 
-	if (stat("/dev/pts", &s) != -1 && stat("/dev/ptmx", &s) != -1)
+	if (thr_data->config->lsb.user_interactive)
+		pid = fork();
+	else if (is_virtual_terminal_available())
 		pid = forkpty(&(thr_data->fd), NULL, NULL, NULL);
 	else {
 		print_current_error_msg("Console unavailable %s\n",
@@ -119,10 +127,10 @@ void *fork_and_exec_script(void *thread_data)
 
 	switch (pid) {
 	case 0:
-		(void)signal(SIGINT,  SIG_IGN);
-		(void)signal(SIGQUIT,  SIG_IGN);
-		(void)signal(SIGTERM,  SIG_IGN);
-		(void)signal(SIGTSTP,  SIG_IGN);
+		(void)signal(SIGINT, SIG_IGN);
+		(void)signal(SIGQUIT, SIG_IGN);
+		(void)signal(SIGTERM, SIG_IGN);
+		(void)signal(SIGTSTP, SIG_IGN);
 		(void)signal(SIGCHLD, SIG_DFL);
 
 		exec_script(thr_data->script_name);
@@ -142,7 +150,6 @@ void *fork_and_exec_script(void *thread_data)
 	pthread_exit(thr_data->script_name);
 }
 
-
 void wait_for_thread(struct proc_info **process,
 			    int status)
 {
@@ -159,6 +166,8 @@ void wait_for_thread(struct proc_info **process,
 			wft_rb = read(pth_aux->fd, wft_buf, sizeof(wft_buf)-1);
 			printf("%s", wft_buf);
 		} while (wft_rb > 0);
+		if (pth_aux->config != NULL)
+			free_script_config(pth_aux->config);
 		close(pth_aux->fd);
 	}
 	*process = pth_aux;
@@ -195,6 +204,7 @@ int exec_all_scripts(char *dirname, struct dirent ***script_list, int list_len)
 	struct dirent **list = *script_list;
 	int i, error, status = 0;
 	struct proc_info *p_list, *p_aux;
+	struct script_config* config = NULL;
 
 	p_list = (struct proc_info *) malloc(sizeof(struct proc_info)
 	                                                            * list_len);
@@ -207,7 +217,14 @@ int exec_all_scripts(char *dirname, struct dirent ***script_list, int list_len)
 	}
 
 	for (i = 0; i < list_len; i++) {
+		config = (struct script_config*) malloc(sizeof(
+		                                         struct script_config));
+		config->script_name = list[i]->d_name;
+		read_script_config(config);
+
 		p_aux->script_name = list[i]->d_name;
+		p_aux->config = config;
+
 		error = pthread_create(&(p_aux->thread), NULL,
 		                       fork_and_exec_script, p_aux);
 		p_aux++;
@@ -218,7 +235,7 @@ int exec_all_scripts(char *dirname, struct dirent ***script_list, int list_len)
 
 		if (time_to_wait(list, list_len, i))
 			wait_for_all_threads(p_list, &p_aux, status);
-		else if ((p_aux - p_list) >= MAX_THREADS)
+		else if ((p_aux - p_list) >= MAX_THREADS || config->lsb.user_interactive)
 			wait_for_thread(&p_aux, status);
 #ifdef DEBUG
 		struct proc_info *aa;

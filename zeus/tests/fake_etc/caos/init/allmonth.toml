@@ -1,0 +1,22 @@
+
+title = "Allmonth caos init config file"
+
+[init-script]
+signature = 923489275234
+name = "allmonth.sh"
+
+[lsb]
+lsb-url = "http://refspecs.linuxfoundation.org/LSB_3.1.0/LSB-Core-generic/LSB-Core-generic/tocsysinit.html"
+short-description = "Start daemon at boot time."
+description = "Enable service provided by daemon."
+
+user-interactive = false
+
+default-start = [ 2, 3, 4, 5 ]
+default-stop = [ 0, 1, 6 ]
+
+provides = []
+required-start = [ "$remote_fs", "$syslog" ]
+required-stop = [ "$remote_fs", "$syslog" ]
+
+

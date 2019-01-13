@@ -1,5 +1,5 @@
 /*
- * Filesistem access.
+ * Filesystem access.
  *
  *    11-Apr-2017 Elgg
  *
@@ -34,7 +34,7 @@
  * This methos use malloc to allocate the returned value, you must free it
  * in your code.
  *
- * Returns a pointer to scripts directory path, NULL is code is unknown.
+ * Returns a pointer to scripts directory path, NULL if code is unknown.
  */
 char *get_script_directory(char code)
 {

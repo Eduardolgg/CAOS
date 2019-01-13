@@ -25,11 +25,14 @@
 
 #include <sys/wait.h>
 
+#include "script_config.h"
+
 struct proc_info {
 	int fd;
 	int fd_slave;
 	char * script_name;
 	pthread_t thread;
+	struct script_config *config;
 };
 
 #define NORMAL_EXIT(status) WIFEXITED(status)

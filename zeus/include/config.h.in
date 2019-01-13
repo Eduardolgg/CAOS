@@ -30,6 +30,7 @@
 #define CAOS_SHORT_DESC CAOS_NAME " init suite"
 #define CAOS_VERSION "@version@"
 #define CAOS_INFO CAOS_SHORT_DESC " " CAOS_VERSION
+#define CAOS_CONFIG_DIR "@caos_config_directory@"
 
 /*
  * Application configuration.

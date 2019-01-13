@@ -69,11 +69,11 @@ void wait_for_child(pid_t pid, char *script_name)
 	if (NORMAL_EXIT(status))
 		syslog_info("S: %s ran correctly.", script_name);
 	else
-		print_current_error_msg("%s: abnormally ended.",
+		print_current_error_msg("%s: abnormally ended.\n",
 					script_name);
 
 	if (NORMAL_EXIT(status) && ERROR_EXIT(status))
-		print_err_msg("%s: exit code [%i]", script_name,
+		print_err_msg("%s: exit code [%i]\n", script_name,
 			      WEXITSTATUS(status));
 }
 
@@ -86,12 +86,12 @@ void fork_and_exec_script(char *script_name)
 	case 0:
 		exec_script(script_name);
 		/* If we got here something went wrong. */
-		print_current_error_msg("Error to execute script %s",
+		print_current_error_msg("Error to execute script %s\n",
 		                        script_name);
 		exit(1);
 		break;
 	case -1:
-		print_current_error_msg("Fork error to %s", script_name);
+		print_current_error_msg("Fork error to %s\n", script_name);
 		break;
 	default:
 		wait_for_child(pid, script_name);
