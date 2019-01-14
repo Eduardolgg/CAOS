@@ -19,7 +19,6 @@ You can see some Screenshots at:
 
 How to build and install
 --------------------------
-
 Yo can run the script buildAndInstall.sh or follow this steps:
 
     meson build
@@ -38,6 +37,22 @@ replace your rc init lines by zeus, for example:
     ...
 
 The tag serial is the start algorithm you can use serial or low_parallel, but low_parallel is still under development
+
+How to try CAOS without break your system
+-------------------------------------------
+You can try CAOS in your system, no pain, is not dangerous, you can edit one line in your inittab and then use GRUB2 or init to exec the runlevel that you want.
+
+    * Edit your inittab, for example set the line "l3:3:wait:/etc/init.d/rc 3" to "l3:3:wait:/sbin/zeus serial".
+
+    Now you can open a terminal and execute **init 3** as root, or **reboot** and follow these steps to init in runlevel 3:
+
+    * When GRUB2 appears use arrow keys, select a kernel and press key e (the default kernel is set by default, press key is enough).
+    * Go to linux line, it look like this:
+	* linux /vmlinuz-X.X.X root=UUID=XXXXXXXXX root ro quiet
+    * At end add 3 like this:
+	* linux /vmlinuz-X.X.X root=UUID=XXXXXXXXX root ro quiet 3
+    * Press 10
+    * Enjoy the new start.
 
 How to run tests
 ------------------
