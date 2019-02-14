@@ -13,7 +13,11 @@ debug=${debug-false}
 ./setDebugMode.sh $1
 rm -rf ./tests/fake_init.d/log/*
 
-cd ./build
+echo "Generating config files"
+cd ../genconfig/
+./generate_test_config.sh
+
+cd ../zeus/build
 ninja clean
 ninja
 ninja test

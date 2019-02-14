@@ -11,6 +11,10 @@ fi
 
 debug=${debug-false}
 
+echo "Generating config files"
+cd ../genconfig/
+sudo ./generate_config.sh
+
 ./setReleaseMode.sh $1
 cd ./build
 ninja clean
