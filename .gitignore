@@ -45,3 +45,4 @@ build
 # Application temp files.
 zeus/tests/fake_etc/log/
 zeus/tests/run/
+zeus/tests/fake_etc/caos
