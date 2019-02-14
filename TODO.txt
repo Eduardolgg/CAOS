@@ -3,3 +3,6 @@ Zeus
 
  * In testing enviroment the relative path to run is not correct becose the
 execution path is modified. Try to store and restore.
+ * Add cgroups.
+ * Boot statistics.
+ * Create killignore files only on shutdown.
