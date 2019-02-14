@@ -152,8 +152,11 @@ class ConfigWriter:
             os.makedirs(self.interactiveScripsDir, 0o755)
 
     def addInteractiveScript(self):
-        if (not os.path.exists(self.interactiveScripsDir + self.config.name)):
-            os.symlink(self.scriptDir + self.config.name, self.interactiveScripsDir + '/' + self.config.name)
+        symlinkDest = self.interactiveScripsDir + '/' + self.config.name
+        print(symlinkDest + ": " + self.config.user_interactive)
+        if (self.config.user_interactive == 'true' and not os.path.islink(symlinkDest)):
+            print("Creating symlink for: " + self.config.name);
+            os.symlink(self.scriptDir + self.config.name, symlinkDest)
 
     def writeConfig(self):
         self.createConfigTree();

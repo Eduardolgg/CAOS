@@ -6,3 +6,4 @@ execution path is modified. Try to store and restore.
  * Add cgroups.
  * Boot statistics.
  * Create killignore files only on shutdown.
+ * Remove obsolete config files with genconfig
