@@ -118,6 +118,10 @@ test('Remove queue start item', low_parallel_tests,
 	args: ['e'], should_fail: false)
 test('Remove queue end item', low_parallel_tests,
 	args: ['f'], should_fail: false)
+test('Two queue list to one item', low_parallel_tests,
+	args: ['g'], should_fail: false)
+test('One queue list, remove item', low_parallel_tests,
+	args: ['h'], should_fail: false)
 
 # Zeus tests.
 test('No params but env',

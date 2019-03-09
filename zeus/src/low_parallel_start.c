@@ -74,7 +74,7 @@ void wait_for_child(pid_t pid, char *script_name)
 	w_status = waitpid(pid, &status, 0);
 
 	if (w_status == -1) {
-		print_current_error_msg("%s: ", script_name);
+		print_current_error_msg("%s: \n", script_name);
 		return;
 	}
 
@@ -89,8 +89,8 @@ void wait_for_child(pid_t pid, char *script_name)
 			      WEXITSTATUS(status));
 }
 
-// TODO: try to use for interactive start scripts
-static
+// TODO: try to use pty for interactive start scripts like a ssh connection.
+/*static
 void send_pty_io_to_standar_io(struct proc_info *thr_data)
 {
 	struct stat stat_info;
@@ -106,23 +106,19 @@ void send_pty_io_to_standar_io(struct proc_info *thr_data)
 		close(thr_data->fd);
 		close(thr_data->fd_slave);
 	}
-}
+}*/
 
-static
-void *fork_and_exec_script(void *thread_data)
+void fork_and_exec_script(int is_interactive, int *fd, char *script_name)
 {
 	pid_t pid;
-	struct proc_info *thr_data;
 
-	thr_data = (struct proc_info *) thread_data;
-
-	if (thr_data->config->lsb.user_interactive)
+	if (is_interactive) {
+		print_dbg_msg("Forking interactive script %s\n", script_name);
 		pid = fork();
-	else if (is_virtual_terminal_available())
-		pid = forkpty(&(thr_data->fd), NULL, NULL, NULL);
+	} else if (is_virtual_terminal_available())
+		pid = forkpty(fd, NULL, NULL, NULL);
 	else {
-		print_current_error_msg("Console unavailable %s\n",
-		                                         thr_data->script_name);
+		print_current_error_msg("Console unavailable %s\n", script_name);
 		pid = fork();
 	}
 
@@ -134,75 +130,102 @@ void *fork_and_exec_script(void *thread_data)
 		(void)signal(SIGTSTP, SIG_IGN);
 		(void)signal(SIGCHLD, SIG_DFL);
 
-		exec_script(thr_data->script_name);
+		exec_script(script_name);
 		// If we got here something went wrong.
 		print_current_error_msg("Error to execute script %s\n",
-		                        thr_data->script_name);
+		                                                  script_name);
 		exit(1);
 		break;
 	case -1:
-		print_current_error_msg("Fork error to %s\n",
-		                        thr_data->script_name);
+		print_current_error_msg("Fork error to %s\n", script_name);
 		break;
 	default:
-		wait_for_child(pid, thr_data->script_name);
-		fsync(thr_data->fd_slave);
+		wait_for_child(pid, script_name);
 	}
+}
+
+void *fork_and_exec_script_in_thread(void *thread_data)
+{
+	struct proc_info *thr_data;
+
+	thr_data = (struct proc_info *) thread_data;
+	print_dbg_msg("Forking %s in thread\n", thr_data->script_name);
+	fork_and_exec_script(thr_data->is_interactive, &(thr_data->fd),
+			     thr_data->script_name);
+	thr_data->is_thread_end = 1;
+	print_dbg_msg("Thread for %s end.\n", thr_data->script_name);
 	pthread_exit(thr_data->script_name);
 }
 
-void wait_for_thread(struct proc_info **process,
-			    int status)
+void pty_to_stdout(int fd)
 {
-	struct proc_info *pth_aux = *process;
-	int pth_error = pthread_join((--pth_aux)->thread, NULL);
-	if (pth_error != 0) {
-		print_current_error();
-		status = -1;
-	}  else {
-		int wft_rb;
-		char wft_buf[256];
-		do {
-			memset(wft_buf, '\0', sizeof(wft_buf));
-			wft_rb = read(pth_aux->fd, wft_buf, sizeof(wft_buf)-1);
-			printf("%s", wft_buf);
-		} while (wft_rb > 0);
-		if (pth_aux->config != NULL)
-			free_script_config(pth_aux->config);
-		close(pth_aux->fd);
-	}
-	*process = pth_aux;
+	int readed;
+	char buffer[256];
+
+	if (fd < 0)
+		return;
+	do {
+		memset(buffer, '\0', sizeof(buffer));
+		readed = read(fd, buffer, sizeof(buffer)-1);
+		printf("%s", buffer);
+	} while (readed > 0);
 }
 
 void remove_queue_item(struct proc_info **process,
-		       struct proc_info **head,
-		       struct proc_info **end)
+		       struct proc_info **head)
 {
 	struct proc_info *item_to_remove, *prev_item, *next_item;
 
 	prev_item = (*process)->prev;
 	next_item = (*process)->next;
-	item_to_remove = (*process);
+	item_to_remove = *process;
 
-	if (*head == *process)
+	if (*head == (*head)->next) {
+		*head = NULL;
+		next_item = NULL;
+		goto free;
+	} else if (*head == item_to_remove)
 		*head = next_item;
-	if (*end == *process)
-		*end = prev_item;
 
 	if (prev_item)
 		prev_item->next = item_to_remove->next;
 	if (next_item)
 		next_item->prev = item_to_remove->prev;
+free:
 	free_proc_info(process);
+	*process = next_item;
 }
 
-void wait_for_all_threads(struct proc_info *pth_list,
-				 struct proc_info **pth_aux,
-				 int status)
+int wait_for_thread(struct proc_info **process, struct proc_info **head)
 {
-	while (*pth_aux != pth_list) {
-		wait_for_thread(pth_aux, status);
+	int status = -1;
+
+	print_dbg_msg("Waiting for thread %s\n", (*process)->script_name);
+	if (!(*process)->is_interactive) {
+		int pth_error = pthread_join((*process)->thread, NULL);
+		if (pth_error != 0)
+			print_current_error_msg("%s", "Thread error:");
 	}
+	pty_to_stdout((*process)->fd);
+	remove_queue_item(process, head);
+	status = 0;
+	return status;
+}
+
+int wait_for_all_threads(struct proc_info **pth_list)
+{
+	int status = 0;
+	struct proc_info *head = (*pth_list);
+
+	while (*pth_list)
+		// TODO: wait if pth_list == head.
+		if ((*pth_list)->is_thread_end)
+			status += wait_for_thread(pth_list, &head);
+		else
+			*pth_list = (*pth_list)->next;
+	pth_list = NULL;
+
+	return status;
 }
 
 #define list_end(index, len) (index == list_len - 1)
@@ -222,22 +245,26 @@ void wait_for_all_threads(struct proc_info *pth_list,
  * p_list is null.
  */
 struct proc_info* add_proc_item(struct proc_info **p_list,
-				struct proc_info **end_item,
 				char* script_name)
 {
-	struct proc_info *p_info = NULL;
+	struct proc_info *p_info = NULL,
+			 *end_item;
 
 	p_info = malloc_proc_info(script_name);
+
 	if (p_info) {
-		if (*end_item)
-			(*end_item)->next = p_info;
-		p_info->prev = *end_item;
-		*end_item = p_info;
+		if (!*p_list) {
+			*p_list = p_info;
+		} else {
+			end_item = (*p_list)->prev;
+			(*p_list)->prev = p_info;
+			end_item->next = p_info;
+
+			p_info->prev = end_item;
+			p_info->next = (*p_list);
+		}
 	} else
 		print_current_error();
-
-	if (!*p_list)
-		*p_list = p_info;
 	return p_info;
 }
 
@@ -250,46 +277,45 @@ static
 int exec_all_scripts(char *dirname, struct dirent ***script_list, int list_len)
 {
 	struct dirent **list = *script_list;
-	int i, error, status = 0;
-	struct proc_info *p_list, *p_aux;
-	struct script_config* config = NULL;
+	int i, status = -1, active_threads = 0;
+	struct proc_info *p_list = NULL,
+	       *last_proc = NULL;
 
-	p_list = (struct proc_info *) malloc(sizeof(struct proc_info)
-	                                                            * list_len);
-	p_aux = p_list;
-
-	if (!p_list || chdir(dirname)) {
+	if (chdir(dirname)) {
 		print_current_error();
-		status = -1;
 		goto finalize;
 	}
 
 	for (i = 0; i < list_len; i++) {
-		config = (struct script_config*) malloc(sizeof(
-		                                         struct script_config));
-		config->script_name = list[i]->d_name;
-		read_script_config(config);
-
-		p_aux->script_name = list[i]->d_name;
-		p_aux->config = config;
-
-		error = pthread_create(&(p_aux->thread), NULL,
-		                       fork_and_exec_script, p_aux);
-		p_aux++;
-		if (error != 0) {
+		print_dbg_msg("En script %s: \n", list[i]->d_name);
+		if (!(last_proc = add_proc_item(&p_list, list[i]->d_name)) ||
+                      pthread_create(&(last_proc->thread), NULL,
+		                   fork_and_exec_script_in_thread, last_proc)) {
+			int fd;
 			print_current_error();
-			status = -1;
-		}
+			fork_and_exec_script(0, &fd, list[i]->d_name);
+
+		} else
+			active_threads++;
+
+		// Delete status info before print prosess output.
+		/*char msgStatus[81];
+		memset(msgStatus, '\b', sizeof(msgStatus - 1));
+		msgStatus[80] = '\0';
+		print("%s", msgStatus);*/
 
 		if (time_to_wait(list, list_len, i))
-			wait_for_all_threads(p_list, &p_aux, status);
-		else if ((p_aux - p_list) >= MAX_THREADS || config->lsb.user_interactive)
-			wait_for_thread(&p_aux, status);
+			status |= wait_for_all_threads(&p_list);
+		else if (active_threads >= MAX_THREADS || last_proc->is_interactive)
+			status |= wait_for_thread(&last_proc, &p_list);
 #ifdef DEBUG
-		struct proc_info *aa;
-		aa = p_aux;
-		while (aa-- != p_list)
-			print_dbg_msg("whaiting for %s\n", aa->script_name);
+		if (p_list) {
+			struct proc_info *aa = p_list;
+			do {
+				print_dbg_msg("Whaiting for %s\n", aa->script_name);
+				aa = aa->next;
+			} while (aa != p_list);
+		}
 #endif
 
 	}

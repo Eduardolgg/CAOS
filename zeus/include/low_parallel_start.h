@@ -40,9 +40,7 @@ int low_parallel_start(struct runlevel *prev_level, struct runlevel *new_level);
 
 /** Only for debug purposes */
 struct proc_info* add_proc_item(struct proc_info **p_list,
-				struct proc_info **end_item,
 				char* script_name);
 
 void remove_queue_item(struct proc_info **process,
-		       struct proc_info **head,
-		       struct proc_info **end);
+		       struct proc_info **head);

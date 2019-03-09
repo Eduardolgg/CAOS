@@ -33,49 +33,71 @@ int main(int argc, char **argv)
 
 	switch(argv[1][0]) {
 	case 'a': // Initialize procesess queue.
-		list_end = add_proc_item(&list_head, &list_end, "Irrelevant.sh");
+		list_end = add_proc_item(&list_head, "Irrelevant.sh");
 		return !(list_head && list_end && list_end == list_head &&
-		         !list_head->next && !list_head->prev);
+		         list_head->next == list_head &&
+			 list_head->prev == list_end);
 	case 'b': // Add two items to processes queue.
-		list_end = add_proc_item(&list_head, &list_end, "Irrelevant1.sh");
-		list_end = add_proc_item(&list_head, &list_end, "Irrelevant2.sh");
+		list_end = add_proc_item(&list_head, "Irrelevant1.sh");
+		list_end = add_proc_item(&list_head, "Irrelevant2.sh");
 		return !(list_head && list_end &&
 		         list_end->prev == list_head &&
+			 list_end->next == list_head &&
 		         list_head->next == list_end &&
-		         !list_end->next && !list_head->prev);
+			 list_head->prev == list_end);
 	case 'c': // Add three items to processes queue.
-		list_end = add_proc_item(&list_head, &list_end, "Irrelevant1.sh");
-		list_end = add_proc_item(&list_head, &list_end, "Irrelevant2.sh");
-		list_end = add_proc_item(&list_head, &list_end, "Irrelevant3.sh");
+		list_end = add_proc_item(&list_head, "Irrelevant1.sh");
+		list_end = add_proc_item(&list_head, "Irrelevant2.sh");
+		list_end = add_proc_item(&list_head, "Irrelevant3.sh");
 		return !(list_head && list_end &&
 		         list_head->next->next == list_end &&
-		         list_end->prev->prev == list_head);
+			 list_head->prev == list_end &&
+		         list_end->prev->prev == list_head &&
+			 list_end->next == list_head);
 	case 'd': // Remove queue middle item.
-		list_end = add_proc_item(&list_head, &list_end, "Irrelevant1.sh");
-		list_end = add_proc_item(&list_head, &list_end, "Irrelevant2.sh");
-		list_end = add_proc_item(&list_head, &list_end, "Irrelevant3.sh");
-		remove_queue_item(&(list_head->next), &(list_head), &(list_end));
+		list_end = add_proc_item(&list_head, "Irrelevant1.sh");
+		list_end = add_proc_item(&list_head, "Irrelevant2.sh");
+		list_end = add_proc_item(&list_head, "Irrelevant3.sh");
+		remove_queue_item(&(list_head->next), &(list_head));
 		return !(list_head && list_end &&
 		         list_end->prev == list_head &&
+			 list_end->next == list_head &&
 		         list_head->next == list_end &&
-		         !list_end->next && !list_head->prev);
+			 list_head->prev == list_end);
 	case 'e': // Remove queue start item.
-		list_end = add_proc_item(&list_head, &list_end, "Irrelevant1.sh");
-		list_end = add_proc_item(&list_head, &list_end, "Irrelevant2.sh");
-		list_end = add_proc_item(&list_head, &list_end, "Irrelevant3.sh");
-		remove_queue_item(&(list_head), &(list_head), &(list_end));
+		list_end = add_proc_item(&list_head, "Irrelevant1.sh");
+		list_end = add_proc_item(&list_head, "Irrelevant2.sh");
+		list_end = add_proc_item(&list_head, "Irrelevant3.sh");
+		struct proc_info *expected_head = list_head->next;
+		remove_queue_item(&(list_head), &(list_head));
 		return !(list_head && list_end &&
 		         list_end->prev == list_head &&
 		         list_head->next == list_end &&
-		         !list_end->next && !list_head->prev);
+			 list_head == expected_head &&
+			 list_end == expected_head->next &&
+			 list_end == expected_head->prev);
 	case 'f': // Remove queue end item.
-		list_end = add_proc_item(&list_head, &list_end, "Irrelevant1.sh");
-		list_end = add_proc_item(&list_head, &list_end, "Irrelevant2.sh");
-		list_end = add_proc_item(&list_head, &list_end, "Irrelevant3.sh");
-		remove_queue_item(&(list_end), &(list_head), &(list_end));
+		list_end = add_proc_item(&list_head, "Irrelevant1.sh");
+		list_end = add_proc_item(&list_head, "Irrelevant2.sh");
+		list_end = add_proc_item(&list_head, "Irrelevant3.sh");
+		struct proc_info *expected_end = list_end->prev;
+		remove_queue_item(&(list_end), &(list_head));
+		list_end = list_head->prev;
 		return !(list_head && list_end &&
 		         list_end->prev == list_head &&
 		         list_head->next == list_end &&
-		         !list_end->next && !list_head->prev);
+			 list_head->prev == expected_end &&
+			 list_end == expected_end &&
+			 expected_end->next == list_head);
+	case 'g': // Two queue list to one item.
+		list_end = add_proc_item(&list_head, "Irrelevant1.sh");
+		list_end = add_proc_item(&list_head, "Irrelevant2.sh");
+		remove_queue_item(&(list_end), &(list_head));
+		return !(list_head->prev == list_head &&
+			 list_head->next == list_head);
+	case 'h': // One queue list, remove item.
+		list_end = add_proc_item(&list_head, "Irrelevant1.sh");
+		remove_queue_item(&(list_end), &(list_head));
+		return !(list_head == NULL);
 	}
 }

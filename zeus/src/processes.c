@@ -35,10 +35,10 @@ struct proc_info* malloc_proc_info(char *script_name)
 	if (p_info) {
 		p_info->fd = -1;
 		p_info->fd_slave = -1;
-		p_info->prev = NULL;
-		p_info->next = NULL;
+		p_info->prev = p_info;
+		p_info->next = p_info;
 		p_info->script_name = script_name;
-		p_info->is_interactive = is_user_interactive(script_name);
+		p_info->is_interactive = is_user_interactive(script_name + 3);
 		p_info->is_thread_end = 0;
 	}
 	return p_info;
@@ -52,4 +52,5 @@ void free_proc_info(struct proc_info **process)
 		close((*process)->fd_slave);
 	/*if ((*process)->script_name)
 		free((*process)->script_name);*/
+	//(*process) = NULL;
 }
