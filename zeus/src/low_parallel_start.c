@@ -42,7 +42,8 @@
 #define STOP "stop"
 
 static
-int is_virtual_terminal_available() {
+int is_virtual_terminal_available()
+{
 	struct stat s;
 
 	return stat("/dev/pts", &s) != -1 && stat("/dev/ptmx", &s) != -1;
@@ -173,6 +174,27 @@ void wait_for_thread(struct proc_info **process,
 	*process = pth_aux;
 }
 
+void remove_queue_item(struct proc_info **process,
+		       struct proc_info **head,
+		       struct proc_info **end)
+{
+	struct proc_info *item_to_remove, *prev_item, *next_item;
+
+	prev_item = (*process)->prev;
+	next_item = (*process)->next;
+	item_to_remove = (*process);
+
+	if (*head == *process)
+		*head = next_item;
+	if (*end == *process)
+		*end = prev_item;
+
+	if (prev_item)
+		prev_item->next = item_to_remove->next;
+	if (next_item)
+		next_item->prev = item_to_remove->prev;
+	free_proc_info(process);
+}
 
 void wait_for_all_threads(struct proc_info *pth_list,
 				 struct proc_info **pth_aux,
@@ -188,11 +210,44 @@ void wait_for_all_threads(struct proc_info *pth_list,
 #define same_level(script_a, script_b)        \
 	(strncmp(script_a, script_b, 3) == 0)
 
-#define MAX_THREADS 4
 #define time_to_wait(script_list, len, index)                                 \
 	(list_end(index, len) ||                                              \
 	(!list_end(index, len) && !same_level(script_list[index + 1]->d_name, \
 	                                      script_list[index]->d_name)))
+
+/*
+ * Add item to p_list.
+ *
+ * Return Pointer to added item, NULL otherwise. P_list points to new item if
+ * p_list is null.
+ */
+struct proc_info* add_proc_item(struct proc_info **p_list,
+				struct proc_info **end_item,
+				char* script_name)
+{
+	struct proc_info *p_info = NULL;
+
+	p_info = (struct proc_info *) malloc(sizeof(struct proc_info));
+	if (!p_info)
+		print_current_error();
+	else {
+		if (*end_item)
+			(*end_item)->next = p_info;
+		// TODO: la inicialización de pinfo fuera en processes.c
+		p_info->fd = -1;
+		p_info->fd_slave = -1;
+		p_info->prev = *end_item;
+		p_info->next = NULL;
+		p_info->script_name = script_name;
+		p_info->is_interactive = is_user_interactive(script_name);
+		p_info->is_thread_end = 0;
+		*end_item = p_info;
+	}
+	if (!*p_list)
+		*p_list = p_info;
+	return p_info;
+}
+
 /*
  * Run all scripts listed on script_list located in dirname directory.
  *

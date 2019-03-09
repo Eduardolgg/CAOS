@@ -1,3 +1,5 @@
+thread_dep = dependency('threads') 
+
 # Executables for tests
 add_test_setup('valgrind_trace_children',
 	exe_wrapper: ['valgrind', '--trace-children=yes']
@@ -42,6 +44,17 @@ runlevel_tests = executable(
 	't_runlevel',
 	sources,
 	include_directories: inc,
+	install: false
+)
+
+sources = ['low_parallel_start.c', '../src/low_parallel_start.c',
+	   '../src/filesystem.c', '../src/processes.c', '../src/log.c']
+low_parallel_tests = executable(
+	't_low_parallel',
+	sources,
+	include_directories: inc,
+	dependencies: thread_dep,
+        link_args: '-lutil',
 	install: false
 )
 
@@ -91,6 +104,20 @@ test('Check runlevel param error', runlevel_tests,
 	args: ['e'], should_fail: true)
 test('Check runlevel test usage', runlevel_tests,
 	args: [], should_fail: true)
+
+# Low_parallel tests.
+test('Add proc to empty list', low_parallel_tests,
+	args: ['a'], should_fail: false)
+test('Add two procs to list', low_parallel_tests,
+	args: ['b'], should_fail: false)
+test('Add three procs to list', low_parallel_tests,
+	args: ['c'], should_fail: false)
+test('Remove queue middle item', low_parallel_tests,
+	args: ['d'], should_fail: false)
+test('Remove queue start item', low_parallel_tests,
+	args: ['e'], should_fail: false)
+test('Remove queue end item', low_parallel_tests,
+	args: ['f'], should_fail: false)
 
 # Zeus tests.
 test('No params but env',

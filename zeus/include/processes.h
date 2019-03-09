@@ -32,8 +32,13 @@ struct proc_info {
 	int fd_slave;
 	char * script_name;
 	pthread_t thread;
+	int is_thread_end;
 	int is_interactive;
+	struct proc_info * prev;
+	struct proc_info * next;
 };
 
 #define NORMAL_EXIT(status) WIFEXITED(status)
 #define ERROR_EXIT(status) WEXITSTATUS(status) != 0
+
+void free_proc_info(struct proc_info **process);
