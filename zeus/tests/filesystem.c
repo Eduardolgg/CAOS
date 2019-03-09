@@ -1,3 +1,5 @@
+#include <unistd.h>
+
 #include "log.h"
 #include "filesystem.h"
 
@@ -7,10 +9,16 @@ int main(int argc, char **argv)
 	int list_len,
 	    expected_list_len,
 	    i, result = 1;
+	char cwd[1024];
 
 	if (argc < 5) {
-		print_err_msg("Usage: %s prev_runlevel act_runlevel "
+		print_err_msg("Usage: %s test_code prev_runlevel act_runlevel "
 			      "expected_list_len\n"
+		              " test_code: \n"
+		              "\ta: Test init diff."
+		              "\tb: Test wrong runlevel code."
+		              "\tc: Test free script list."
+		              "\td: Test script config."
 			      "	runlevel codes 2|3|4|5|S\n"
 			      "	expected_list_len = num script to run from "
 			      " prev to act.\n", argv[0]);
@@ -50,6 +58,14 @@ int main(int argc, char **argv)
 					&(script_list.list));
 		free_script_llist(&(script_list.list), list_len);
 		result = !(script_list.list == NULL);
+		break;
+	case 'd':
+		getcwd(cwd, sizeof(cwd));
+		print_inf_msg("Current working dir: %s\n", cwd);
+
+		result = is_user_interactive("allmonth.sh");
+		result += is_user_interactive("non-existent.sh");
+		result = !(result == 1);
 		break;
 	}
 	return result;

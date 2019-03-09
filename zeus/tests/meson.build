@@ -73,6 +73,7 @@ test('Change init diff 9->2', filesystem_tests, args: ['a', '9', '2', '1'],
 	should_fail: true)
 test('Get script dir, wrong code', filesystem_tests, args: ['b', '9', '-', '-'])
 test('free_script_llist', filesystem_tests, args: ['c', '2', '5', '-'])
+test('Check interactive scripts', filesystem_tests, args: ['d', '2', '3', '-'])
 
 
 # Runlevel tests.

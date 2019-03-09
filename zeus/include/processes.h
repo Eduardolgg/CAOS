@@ -32,7 +32,7 @@ struct proc_info {
 	int fd_slave;
 	char * script_name;
 	pthread_t thread;
-	struct script_config *config;
+	int is_interactive;
 };
 
 #define NORMAL_EXIT(status) WIFEXITED(status)

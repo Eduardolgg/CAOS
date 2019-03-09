@@ -23,6 +23,7 @@
 
 #include <stdlib.h>
 #include <string.h>
+#include <sys/stat.h>
 
 #include "config.h"
 #include "log.h"
@@ -181,4 +182,27 @@ exit:
 
 	*script_list = final_slist.list;
 	return final_slist.len;
+}
+
+#define is_buffer_enough(buffer_size, script_name_size) \
+	(buffer_size > script_name_size + sizeof(CAOS_CONFIG_DIR_USER_INTERACTIVE))
+
+int is_user_interactive(char* script_name)
+{
+	struct stat s;
+	int buffer_len = 256;
+	char script_path[buffer_len];
+
+	if (!is_buffer_enough(sizeof(script_path), sizeof(script_name))) {
+		print_war_msg("Path to %s is too large, I treat it as "
+		              "interactive script", script_name);
+		return 1;
+	}
+
+	memset(script_path, '\0', sizeof(script_path));
+	strncpy(script_path, CAOS_CONFIG_DIR_USER_INTERACTIVE,
+	                              sizeof(CAOS_CONFIG_DIR_USER_INTERACTIVE));
+	strcat(script_path, script_name);
+	print_inf_msg("%s\n", script_path);
+	return stat(script_path, &s) != -1;
 }

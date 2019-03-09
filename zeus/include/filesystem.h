@@ -28,7 +28,7 @@
 #include "runlevel_utils.h"
 
 /*
- * Allows to manage script lists in one place.
+ * Allows to manage a script list info.
  */
 struct script_list {
 	struct dirent **list;
@@ -100,6 +100,13 @@ void free_script_llist(struct dirent ***script_list, int list_len);
 int get_change_init_scripts(struct runlevel *prev_level,
                             struct runlevel *new_level,
                             struct dirent ***script_list);
+
+/*
+ * Ask for interactive script
+ *
+ * Return 1 if script is interactive, 0 otherwise.
+ */
+int is_user_interactive(char* script_name);
 
 /*
  * Allows you to select only the startup scripts, starting with S.
