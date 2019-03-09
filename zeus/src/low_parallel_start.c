@@ -227,22 +227,15 @@ struct proc_info* add_proc_item(struct proc_info **p_list,
 {
 	struct proc_info *p_info = NULL;
 
-	p_info = (struct proc_info *) malloc(sizeof(struct proc_info));
-	if (!p_info)
-		print_current_error();
-	else {
+	p_info = malloc_proc_info(script_name);
+	if (p_info) {
 		if (*end_item)
 			(*end_item)->next = p_info;
-		// TODO: la inicialización de pinfo fuera en processes.c
-		p_info->fd = -1;
-		p_info->fd_slave = -1;
 		p_info->prev = *end_item;
-		p_info->next = NULL;
-		p_info->script_name = script_name;
-		p_info->is_interactive = is_user_interactive(script_name);
-		p_info->is_thread_end = 0;
 		*end_item = p_info;
-	}
+	} else
+		print_current_error();
+
 	if (!*p_list)
 		*p_list = p_info;
 	return p_info;

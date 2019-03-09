@@ -41,4 +41,6 @@ struct proc_info {
 #define NORMAL_EXIT(status) WIFEXITED(status)
 #define ERROR_EXIT(status) WEXITSTATUS(status) != 0
 
+struct proc_info* malloc_proc_info(char *script_name);
+
 void free_proc_info(struct proc_info **process);
