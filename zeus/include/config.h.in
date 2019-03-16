@@ -32,6 +32,7 @@
 #define CAOS_INFO CAOS_SHORT_DESC " " CAOS_VERSION
 #define CAOS_CONFIG_DIR "@caos_config_directory@"
 #define CAOS_CONFIG_DIR_USER_INTERACTIVE "@caos_config_dir_user_interactive@"
+#define CAOS_CONFIG_DIR_NO_USER_INTERACTIVE "@caos_config_dir_no_user_interactive@"
 
 /*
  * Application configuration.

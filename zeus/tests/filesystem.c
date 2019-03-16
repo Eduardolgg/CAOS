@@ -60,12 +60,16 @@ int main(int argc, char **argv)
 		result = !(script_list.list == NULL);
 		break;
 	case 'd':
+		if (chdir(get_script_directory('S')) != 0)
+			return 1;
+
 		getcwd(cwd, sizeof(cwd));
 		print_inf_msg("Current working dir: %s\n", cwd);
 
 		result = is_user_interactive("allmonth.sh");
 		result += is_user_interactive("non-existent.sh");
-		result = !(result == 1);
+		result += is_user_interactive("spring.sh");
+		result = !(result == 2);
 		break;
 	}
 	return result;

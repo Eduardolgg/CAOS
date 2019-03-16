@@ -145,18 +145,26 @@ class ConfigWriter:
         self.scriptDir = scriptDir
         self.outputDir = outputDir
         self.interactiveScripsDir = ""
+        self.noInteractiveScripsDir = ""
 
     def createConfigTree(self):
         self.interactiveScripsDir = self.outputDir + "interactive"
         if (not os.path.exists(self.interactiveScripsDir)):
             os.makedirs(self.interactiveScripsDir, 0o755)
 
+        self.noInteractiveScripsDir = self.outputDir + "no_interactive"
+        if (not os.path.exists(self.noInteractiveScripsDir)):
+            os.makedirs(self.noInteractiveScripsDir, 0o755)
+
     def addInteractiveScript(self):
-        symlinkDest = self.interactiveScripsDir + '/' + self.config.name
-        print(symlinkDest + ": " + self.config.user_interactive)
-        if (self.config.user_interactive == 'true' and not os.path.islink(symlinkDest)):
-            print("Creating symlink for: " + self.config.name);
-            os.symlink(self.scriptDir + self.config.name, symlinkDest)
+        symlinkDestInteractive = self.interactiveScripsDir + '/' + self.config.name
+        symlinkDestNoInteractive = self.noInteractiveScripsDir + '/' + self.config.name
+        if (self.config.user_interactive == 'true' and not os.path.islink(symlinkDestInteractive)):
+            os.symlink(self.scriptDir + self.config.name, symlinkDestInteractive)
+            print(symlinkDestInteractive + ": " + self.config.user_interactive)
+        elif (not os.path.islink(symlinkDestNoInteractive)):
+            os.symlink(self.scriptDir + self.config.name, symlinkDestNoInteractive)
+            print(symlinkDestNoInteractive + ": " + self.config.user_interactive)
 
     def writeConfig(self):
         self.createConfigTree();

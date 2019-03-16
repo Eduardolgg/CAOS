@@ -11,7 +11,8 @@ if buildtype == 'debug' or buildtype == 'debugoptimized'
 	conf.set('rcx_buffer_len', '24')
 	conf.set('run_directory', '../tests/run')
 	conf.set('caos_config_directory', '../tests/fake_etc/caos/init/')
-	conf.set('caos_config_dir_user_interactive', '../tests/fake_etc/caos/init/interactive/')
+	conf.set('caos_config_dir_user_interactive', '../caos/init/interactive/')
+	conf.set('caos_config_dir_no_user_interactive', '../caos/init/no_interactive/')
 else
 	conf.set('rcx_directory', '/etc/rcX.d')
 	conf.set('rcx_xchar_location', '7')
@@ -19,6 +20,7 @@ else
 	conf.set('run_directory', '/run')
 	conf.set('caos_config_directory', '/etc/caos/init/')
 	conf.set('caos_config_dir_user_interactive', '/etc/caos/init/interactive/')
+	conf.set('caos_config_dir_no_user_interactive', '/etc/caos/init/no_interactive/')
 endif
 
 configure_file(

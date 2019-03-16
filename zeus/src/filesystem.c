@@ -25,6 +25,8 @@
 #include <string.h>
 #include <sys/stat.h>
 
+#include <unistd.h> //TODO: eliminar es sólo para pruebas.
+
 #include "config.h"
 #include "log.h"
 #include "filesystem.h"
@@ -200,9 +202,10 @@ int is_user_interactive(char* script_name)
 	}
 
 	memset(script_path, '\0', sizeof(script_path));
-	strncpy(script_path, CAOS_CONFIG_DIR_USER_INTERACTIVE,
-	                              sizeof(CAOS_CONFIG_DIR_USER_INTERACTIVE));
+	strncpy(script_path, CAOS_CONFIG_DIR_NO_USER_INTERACTIVE,
+	                              sizeof(CAOS_CONFIG_DIR_NO_USER_INTERACTIVE));
 	strcat(script_path, script_name);
-	print_inf_msg("%s\n", script_path);
-	return stat(script_path, &s) != -1;
+	int interactive = lstat(script_path, &s) == -1;
+	print_dbg_msg("%s > Int: %s\n", script_path, interactive ? "Yes": "No");
+	return interactive;
 }
