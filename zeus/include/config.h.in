@@ -49,8 +49,8 @@
  * RC configuration.
  */
 #define RCX_DIR "@rcx_directory@"
-#define RCX_XCHAR_LOCATION @rcx_xchar_location@
-#define RCX_BUFFER_LEN @rcx_buffer_len@
+#define RCX_XCHAR_LOCATION sizeof(RCX_DIR) - 4
+#define RCX_BUFFER_LEN sizeof(RCX_DIR) + 1
 
 /*
  * ....
