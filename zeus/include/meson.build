@@ -12,7 +12,7 @@ if buildtype == 'debug' or buildtype == 'debugoptimized'
 	conf.set('run_directory', pj_root + 'tests/run')
 	conf.set('caos_config_directory', pj_root + 'tests/fake_etc/caos/init/')
 	conf.set('caos_config_dir_user_interactive', pj_root + 'tests/fake_etc/caos/init/interactive/')
-	conf.set('caos_config_dir_no_user_interactive', pj_root + 'tests/fake_etc/caos/init/no_ineractive/')
+	conf.set('caos_config_dir_no_user_interactive', pj_root + 'tests/fake_etc/caos/init/no_interactive/')
 else
 	conf.set('rcx_directory', '/etc/rcX.d')
 	conf.set('run_directory', '/run')

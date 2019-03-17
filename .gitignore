@@ -46,3 +46,4 @@ build
 zeus/tests/fake_etc/log/
 zeus/tests/run/
 zeus/tests/fake_etc/caos
+zeus/tests/run/sendsigs.omit.d/zeus

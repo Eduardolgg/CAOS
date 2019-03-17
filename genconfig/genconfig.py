@@ -118,7 +118,8 @@ class ConfigReader:
             elif keyword == "DESCRIPTION": #TODO description could be in two lines
                 self.scriptConfig.description = facilities
             elif keyword == "X-INTERACTIVE":
-                self.scriptConfig.user_interactive = facilities
+                print("\t" + keyword + ": " + facilities)
+                self.scriptConfig.user_interactive = facilities.lower()
             else:
                 print("Unknown keyword [" + keyword + "] values [" + facilities + "]")
         except:
@@ -162,7 +163,7 @@ class ConfigWriter:
         if (self.config.user_interactive == 'true' and not os.path.islink(symlinkDestInteractive)):
             os.symlink(self.scriptDir + self.config.name, symlinkDestInteractive)
             print(symlinkDestInteractive + ": " + self.config.user_interactive)
-        elif (not os.path.islink(symlinkDestNoInteractive)):
+        elif (self.config.user_interactive == 'false' and not os.path.islink(symlinkDestNoInteractive)):
             os.symlink(self.scriptDir + self.config.name, symlinkDestNoInteractive)
             print(symlinkDestNoInteractive + ": " + self.config.user_interactive)
 
@@ -230,4 +231,5 @@ if __name__ == "__main__":
         break
 
     for script in scripts:
+        print("In script: " + script)
         ConfigGenerator(scriptsDir, script, outputDir).genConfig()
