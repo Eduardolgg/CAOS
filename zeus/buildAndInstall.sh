@@ -15,6 +15,7 @@ echo "Generating config files"
 cd ../genconfig/
 sudo ./generate_config.sh
 
+cd ../zeus/
 ./setReleaseMode.sh $1
 cd ./build
 ninja clean

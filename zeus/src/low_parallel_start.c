@@ -277,7 +277,7 @@ static
 int exec_all_scripts(char *dirname, struct dirent ***script_list, int list_len)
 {
 	struct dirent **list = *script_list;
-	int i, status = -1, active_threads = 0;
+	int i, status = 0, active_threads = 0;
 	struct proc_info *p_list = NULL,
 	       *last_proc = NULL;
 
@@ -305,9 +305,9 @@ int exec_all_scripts(char *dirname, struct dirent ***script_list, int list_len)
 		print("%s", msgStatus);*/
 
 		if (time_to_wait(list, list_len, i))
-			status |= wait_for_all_threads(&p_list);
+			status += wait_for_all_threads(&p_list);
 		else if (active_threads >= MAX_THREADS || last_proc->is_interactive)
-			status |= wait_for_thread(&last_proc, &p_list);
+			status += wait_for_thread(&last_proc, &p_list);
 #ifdef DEBUG
 		if (p_list) {
 			struct proc_info *aa = p_list;
@@ -342,6 +342,8 @@ int low_parallel_start(struct runlevel *prev_level, struct runlevel *new_level)
 	struct dirent **script_list;
 	int list_len, exec_output;
 
+	print_dbg_msg("Selecting boot type %c->%c\n", prev_level->code,
+	                                                       new_level->code);
 	if (IS_SYS_BOOT(prev_level->code))
 		list_len = get_start_init_scripts(new_level->dir,
 		                                  &script_list);

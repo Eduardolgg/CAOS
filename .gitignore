@@ -42,6 +42,10 @@ build
 # Vim files
 *.swp
 
+# Eclipse files
+.metadata
+.project
+
 # Application temp files.
 zeus/tests/fake_etc/log/
 zeus/tests/run/

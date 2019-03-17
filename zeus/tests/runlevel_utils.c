@@ -43,6 +43,7 @@ int main(int argc, char **argv)
 		break;
 	default:
 		result =  1;
+		printf("Test do not exist");
 	}
 
 	return result;

@@ -67,7 +67,11 @@ int print_msg(char *format, char *color, ...);
 
 #define print_err_msg(format, ...) print_msg(format, C_RED, ##__VA_ARGS__);
 
+#ifdef DEBUG
 #define print_dbg_msg(format, ...) print_msg(format, C_PURPLE, ##__VA_ARGS__);
+#else
+#define print_dbg_msg(format, ...) print_msg("", C_PURPLE);
+#endif
 
 #define print_current_error_msg(format, ...)                                 \
 ({                                                                           \

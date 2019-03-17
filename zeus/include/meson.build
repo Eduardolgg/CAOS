@@ -5,7 +5,7 @@ conf = configuration_data()
 conf.set('version', meson.project_version())
 conf.set('app_name', meson.project_name())
 conf.set('USE_COLORS', true)
-conf.set('DEBUG', true)
+conf.set('DEBUG', false)
 #conf.set('zeus_exec_name', zeus.exec)
 if buildtype == 'debug' or buildtype == 'debugoptimized'
 	conf.set('rcx_directory', pj_root + 'tests/fake_etc/rcX.d')
