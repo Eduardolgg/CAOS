@@ -18,15 +18,18 @@ name=`basename $0`
 stdout_log="../log/init.log"
 timestamp=$(date)
 
+. /lib/lsb/init-functions
+
 case "$1" in
     start)
-        echo "Starting $name"
+        log_daemon_msg "Starting" "$name"
         sleep 0.5
-        echo "Started $name"
+        log_end_msg 0
         echo "$timestamp Starting $name" >> $stdout_log
     ;;
     stop)
-        echo "Stopping $name.."
+        log_daemon_msg "Stopping" "$name"
+        log_end_msg 0
         echo "$timestamp Stoping $name" >> $stdout_log
     ;;
     restart)
@@ -34,7 +37,7 @@ case "$1" in
         $0 start
     ;;
     status)
-        echo "Running"
+        log_action_msg "Running"
         echo "$timestamp Status $name" >> $stdout_log
     ;;
     *)
