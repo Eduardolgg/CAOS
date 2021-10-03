@@ -24,6 +24,7 @@ int main(int argc, char **argv)
 		sleep(15);
 		break;
 	case 'e': /* return an error state */
+		sleep(15);
 		exit(1);
 	case 'b': /* crash */
 		a[100] = 'j';

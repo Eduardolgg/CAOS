@@ -15,17 +15,18 @@ void *send_signals_to_child(void *pid)
 {
 	pid_t pid_ = *((pid_t *) pid);
 
-	DELAY;
+ 	DELAY;
 	print_inf_msg("Stopping child %i\n", pid_);
 	kill(pid_, SIGSTOP);
 
 	DELAY;
 	print_inf_msg("Continuing child %i\n", pid_);
 	kill(pid_, SIGCONT);
-
+/*
 	DELAY;
 	print_inf_msg("Ending child %i\n", pid_);
 	kill(pid_, SIGTERM);
+*/
 
 	pthread_exit(pid);
 }
@@ -54,15 +55,15 @@ int main(int argc, char **argv)
 				      "child status[%i]\n", w_status, status);
 
 			if (w_status == -1)
-				print_current_error_msg("%s", "ERROR: Waitpid");
+				print_current_error_msg("%s\n", "ERROR: Waitpid");
 
 			if (!NORMAL_EXIT(status)) {
-				print_current_error_msg("%s", "Child abnormally \
+				print_current_error_msg("%s\n", "Child abnormally \
 							ended.");
 				exit(1);
 			}
-			if (NORMAL_EXIT(status) && ERROR_EXIT(status)) {
-				print_err_msg("%s", "Children exit error.\n");
+			if (ERROR_EXIT(status)) {
+				print_err_msg("%s\n", "Children exit error.");
 				exit(1);
 			}
 		} while (!WIFEXITED(status) && !WIFSIGNALED(status));
