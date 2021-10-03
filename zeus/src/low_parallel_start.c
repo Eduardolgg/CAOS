@@ -115,10 +115,13 @@ void fork_and_exec_script(int is_interactive, int *fd, char *script_name)
 	if (is_interactive) {
 		print_dbg_msg("Forking interactive script %s\n", script_name);
 		pid = fork();
-	} else if (is_virtual_terminal_available())
+	} else if (is_virtual_terminal_available()) {
+		print_dbg_msg("Forking NO interactive script on pseudo-tty %s\n",
+		               script_name);
 		pid = forkpty(fd, NULL, NULL, NULL);
-	else {
-		print_current_error_msg("Console unavailable %s\n", script_name);
+	} else {
+		print_current_error_msg("Pseudo-tty unavailable for interactive \
+		                         script %s\n", script_name);
 		pid = fork();
 	}
 
@@ -149,11 +152,11 @@ void *fork_and_exec_script_in_thread(void *thread_data)
 	struct proc_info *thr_data;
 
 	thr_data = (struct proc_info *) thread_data;
-	print_dbg_msg("Forking %s in thread\n", thr_data->script_name);
+	print_dbg_msg("Forking in thread: %s\n", thr_data->script_name);
 	fork_and_exec_script(thr_data->is_interactive, &(thr_data->fd),
 			     thr_data->script_name);
 	thr_data->is_thread_end = 1;
-	print_dbg_msg("Thread for %s end.\n", thr_data->script_name);
+	print_dbg_msg("Thread end for: %s\n", thr_data->script_name);
 	pthread_exit(thr_data->script_name);
 }
 
@@ -204,7 +207,7 @@ int wait_for_thread(struct proc_info **process, struct proc_info **head)
 	if (!(*process)->is_interactive) {
 		int pth_error = pthread_join((*process)->thread, NULL);
 		if (pth_error != 0)
-			print_current_error_msg("%s", "Thread error:");
+			print_current_error_msg("%s\n", "Thread error:");
 	}
 	pty_to_stdout((*process)->fd);
 	remove_queue_item(process, head);
@@ -287,7 +290,7 @@ int exec_all_scripts(char *dirname, struct dirent ***script_list, int list_len)
 	}
 
 	for (i = 0; i < list_len; i++) {
-		print_dbg_msg("En script %s: \n", list[i]->d_name);
+		print_dbg_msg("In script %s: \n", list[i]->d_name);
 		if (!(last_proc = add_proc_item(&p_list, list[i]->d_name)) ||
                       pthread_create(&(last_proc->thread), NULL,
 		                   fork_and_exec_script_in_thread, last_proc)) {
@@ -308,7 +311,7 @@ int exec_all_scripts(char *dirname, struct dirent ***script_list, int list_len)
 			status += wait_for_all_threads(&p_list);
 		else if (active_threads >= MAX_THREADS || last_proc->is_interactive)
 			status += wait_for_thread(&last_proc, &p_list);
-#ifdef DEBUG
+/* #ifdef DEBUG
 		if (p_list) {
 			struct proc_info *aa = p_list;
 			do {
@@ -316,7 +319,7 @@ int exec_all_scripts(char *dirname, struct dirent ***script_list, int list_len)
 				aa = aa->next;
 			} while (aa != p_list);
 		}
-#endif
+#endif*/
 
 	}
 finalize:
