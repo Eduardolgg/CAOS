@@ -49,33 +49,34 @@
 /*
  * Message type definitions.
  */
-#define TEXT "C_GRAY"
-#define INF "C_GREEN"
-#define WAR "C_YELLOW"
-#define ERR "C_RED"
+#define TEXT C_GRAY
+#define INF C_GREEN
+#define WAR C_YELLOW
+#define ERR C_RED
+#define DBG C_PURPLE
 
 /*
  * Message print macros.
  */
 int print_msg(char *format, char *color, ...);
 
-#define print_text_msg(format, ...) print_msg(format, C_GRAY, ##__VA_ARGS__);
+#define print_text_msg(format, ...) print_msg(format, TEXT, ##__VA_ARGS__);
 
-#define print_inf_msg(format, ...) print_msg(format, C_GREEN, ##__VA_ARGS__);
+#define print_inf_msg(format, ...) print_msg(format, INF, ##__VA_ARGS__);
 
-#define print_war_msg(format, ...) print_msg(format, C_YELLOW, ##__VA_ARGS__);
+#define print_war_msg(format, ...) print_msg(format, WAR, ##__VA_ARGS__);
 
-#define print_err_msg(format, ...) print_msg(format, C_RED, ##__VA_ARGS__);
+#define print_err_msg(format, ...) print_msg(format, ERR, ##__VA_ARGS__);
 
 #ifdef DEBUG
-#define print_dbg_msg(format, ...) print_msg(format, C_PURPLE, ##__VA_ARGS__);
+#define print_dbg_msg(format, ...) print_msg(format, DBG, ##__VA_ARGS__); syslog_info(format, ##__VA_ARGS__)
 #else
-#define print_dbg_msg(format, ...) print_msg("", C_PURPLE);
+#define print_dbg_msg(format, ...) ({})
 #endif
 
 #define print_current_error_msg(format, ...)                                 \
 ({                                                                           \
-	print_msg(format " %s\n", C_RED, ##__VA_ARGS__, strerror(errno));    \
+	print_msg(format " %s\n", ERR, ##__VA_ARGS__, strerror(errno));    \
 	openlog(APP_NAME, LOG_ODELAY, LOG_DAEMON);                           \
 	syslog(LOG_ERR, format, ##__VA_ARGS__);                              \
 	closelog();                                                          \
