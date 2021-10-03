@@ -163,14 +163,14 @@ void *fork_and_exec_script_in_thread(void *thread_data)
 void pty_to_stdout(int fd)
 {
 	int readed;
-	char buffer[256];
+	unsigned char buffer[256];
 
 	if (fd < 0)
 		return;
 	do {
-		memset(buffer, '\0', sizeof(buffer));
-		readed = read(fd, buffer, sizeof(buffer)-1);
-		printf("%s", buffer);
+		readed = read(fd, buffer, sizeof(buffer) - sizeof(char));
+		if (readed > 0)
+			fwrite(buffer, sizeof(unsigned char), readed, stdout);
 	} while (readed > 0);
 }
 
