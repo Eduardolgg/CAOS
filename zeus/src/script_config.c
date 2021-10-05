@@ -24,8 +24,7 @@ int init_config_file_name(struct script_config* config)
 		strcpy(config->config_file_name, config->script_name + 3);
 	else
 		strcpy(config->config_file_name, config->script_name);
-	strncat(config->config_file_name, SCRIPT_CONFIG_EXTENCION,
-                                               sizeof(SCRIPT_CONFIG_EXTENCION));
+	strcat(config->config_file_name, SCRIPT_CONFIG_EXTENCION);
 	return TRUE;
 }
 
@@ -43,7 +42,7 @@ int read_script_configuration(toml_table_t** conf_data, struct script_config* co
 
 	if ((file = fopen(config->config_file_path, "r")) == 0) {
 		print_err_msg("Error opening config file %s error: %s\n",
-		   config->config_file_name, perror);
+		   config->config_file_name, strerror(errno));
 		return FALSE;
 	}
 

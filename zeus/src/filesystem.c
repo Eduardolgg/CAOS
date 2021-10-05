@@ -202,8 +202,7 @@ int is_user_interactive(char* script_name)
 	}
 
 	memset(script_path, '\0', sizeof(script_path));
-	strncpy(script_path, CAOS_CONFIG_DIR_NO_USER_INTERACTIVE,
-	                              sizeof(CAOS_CONFIG_DIR_NO_USER_INTERACTIVE));
+	strcpy(script_path, CAOS_CONFIG_DIR_NO_USER_INTERACTIVE);
 	strcat(script_path, script_name);
 	int interactive = lstat(script_path, &s) == -1;
 	print_dbg_msg("%s > Int: %s\n", script_path, interactive ? "Yes": "No");

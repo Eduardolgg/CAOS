@@ -16,7 +16,7 @@ char *create_file_path(char *base_path, struct run_info *info)
 	if (path == NULL)
 		print_war_msg("I can't create the file path for [%s]: no memory allocated\n",
 			      info->file_name);
-	strncpy(path, base_path, strlen(base_path));
+	strcpy(path, base_path);
 	strcpy(path + strlen(base_path), info->file_name);
 	return path;
 }
