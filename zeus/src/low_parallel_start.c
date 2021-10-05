@@ -292,35 +292,21 @@ int exec_all_scripts(char *dirname, struct dirent ***script_list, int list_len)
 	for (i = 0; i < list_len; i++) {
 		print_dbg_msg("In script %s: \n", list[i]->d_name);
 		if (!(last_proc = add_proc_item(&p_list, list[i]->d_name)) ||
-                      pthread_create(&(last_proc->thread), NULL,
+                            pthread_create(&(last_proc->thread), NULL,
 		                   fork_and_exec_script_in_thread, last_proc)) {
 			int fd;
 			print_current_error();
 			fork_and_exec_script(0, &fd, list[i]->d_name);
-
 		} else
 			active_threads++;
 
-		// Delete status info before print prosess output.
-		/*char msgStatus[81];
-		memset(msgStatus, '\b', sizeof(msgStatus - 1));
-		msgStatus[80] = '\0';
-		print("%s", msgStatus);*/
-
-		if (time_to_wait(list, list_len, i))
-			status += wait_for_all_threads(&p_list);
-		else if (active_threads >= MAX_THREADS || last_proc->is_interactive)
+		if (active_threads >= MAX_THREADS || last_proc->is_interactive) {
+			if (last_proc->is_interactive)
+				printf("Waiting for interactive %s\n", last_proc->script_name);
 			status += wait_for_thread(&last_proc, &p_list);
-/* #ifdef DEBUG
-		if (p_list) {
-			struct proc_info *aa = p_list;
-			do {
-				print_dbg_msg("Whaiting for %s\n", aa->script_name);
-				aa = aa->next;
-			} while (aa != p_list);
 		}
-#endif*/
-
+		else if (time_to_wait(list, list_len, i))
+			status += wait_for_all_threads(&p_list);
 	}
 finalize:
 	free(p_list);
