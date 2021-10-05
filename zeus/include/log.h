@@ -60,11 +60,11 @@
  */
 int print_msg(char *format, char *color, ...);
 
-#define print_text_msg(format, ...) print_msg(format, TEXT, ##__VA_ARGS__);
+#define print_text_msg(format, ...) print_msg(format, TEXT, ##__VA_ARGS__)
 
-#define print_inf_msg(format, ...) print_msg(format, INF, ##__VA_ARGS__);
+#define print_inf_msg(format, ...) print_msg(format, INF, ##__VA_ARGS__)
 
-#define print_war_msg(format, ...) print_msg(format, WAR, ##__VA_ARGS__);
+#define print_war_msg(format, ...) print_msg(format, WAR, ##__VA_ARGS__)
 
 #ifdef PRINT_ERROR_MSG_ON_SCREEN
 #define print_err_msg(format, ...) print_msg(format, ERR, ##__VA_ARGS__)
