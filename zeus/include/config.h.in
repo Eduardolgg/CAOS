@@ -40,6 +40,8 @@
 #define APP_NAME "@app_name@"
 #mesondefine USE_COLORS
 #mesondefine DEBUG
+//#define DEBUG
+//#define PRINT_ERROR_MSG_ON_SCREEN
 #define MAX_THREADS 400
 #define SENDSIGS_OMIT_DIR "@run_directory@/sendsigs.omit.d/"
 // TODO: find meson define exec name

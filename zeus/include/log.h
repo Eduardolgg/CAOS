@@ -66,7 +66,13 @@ int print_msg(char *format, char *color, ...);
 
 #define print_war_msg(format, ...) print_msg(format, WAR, ##__VA_ARGS__);
 
-#define print_err_msg(format, ...) print_msg(format, ERR, ##__VA_ARGS__);
+#ifdef PRINT_ERROR_MSG_ON_SCREEN
+#define print_err_msg(format, ...) print_msg(format, ERR, ##__VA_ARGS__)
+#else
+#define print_err_msg(format, ...) syslog_info(format, ##__VA_ARGS__)
+#endif
+
+#define print_err_log(format, ...) syslog_info(format, ##__VA_ARGS__)
 
 #ifdef DEBUG
 #define print_dbg_msg(format, ...) print_msg(format, DBG, ##__VA_ARGS__); syslog_info(format, ##__VA_ARGS__)
@@ -76,7 +82,7 @@ int print_msg(char *format, char *color, ...);
 
 #define print_current_error_msg(format, ...)                                 \
 ({                                                                           \
-	print_msg(format " %s\n", ERR, ##__VA_ARGS__, strerror(errno));    \
+	print_err_msg(format " %s\n", ##__VA_ARGS__, strerror(errno));       \
 	openlog(APP_NAME, LOG_ODELAY, LOG_DAEMON);                           \
 	syslog(LOG_ERR, format, ##__VA_ARGS__);                              \
 	closelog();                                                          \
