@@ -60,7 +60,7 @@ void exec_script(char *script_name)
 		execl(script_name, script_name, STOP, NULL);
 		break;
 	default:
-		print_err_msg("ERROR: %s is not a start/stop script, it will "
+		print_err_msg("ERROR: LP, %s is not a start/stop script, it will "
 		              "not run.\n", script_name);
 	}
 }
@@ -81,11 +81,11 @@ void wait_for_child(pid_t pid, char *script_name)
 	if (NORMAL_EXIT(status))
 		syslog_info("LP: %s ran correctly.", script_name);
 	else
-		print_current_error_msg("%s: abnormally ended.\n",
+		print_current_error_msg("LP: %s abnormally ended.\n",
 					script_name);
 
 	if (NORMAL_EXIT(status) && ERROR_EXIT(status))
-		print_err_log("%s: exit code [%i]\n", script_name,
+		print_err_log("LP: %s exit code [%i]\n", script_name,
 			      WEXITSTATUS(status));
 }
 
@@ -206,7 +206,7 @@ int wait_for_thread(struct proc_info **process, struct proc_info **head)
 	print_dbg_msg("Waiting for thread %s\n", (*process)->script_name);
 	int pth_error = pthread_join((*process)->thread, NULL);
 	if (pth_error != 0)
-		print_current_error_msg("%s\n", "Thread error:");
+		print_current_error_msg("LP: %s\n", "Thread error:");
 
 	if (!(*process)->is_interactive)
 		pty_to_stdout((*process)->fd);
