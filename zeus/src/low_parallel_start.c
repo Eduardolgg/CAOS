@@ -204,12 +204,12 @@ int wait_for_thread(struct proc_info **process, struct proc_info **head)
 	int status = -1;
 
 	print_dbg_msg("Waiting for thread %s\n", (*process)->script_name);
-	if (!(*process)->is_interactive) {
-		int pth_error = pthread_join((*process)->thread, NULL);
-		if (pth_error != 0)
-			print_current_error_msg("%s\n", "Thread error:");
-	}
-	pty_to_stdout((*process)->fd);
+	int pth_error = pthread_join((*process)->thread, NULL);
+	if (pth_error != 0)
+		print_current_error_msg("%s\n", "Thread error:");
+
+	if (!(*process)->is_interactive)
+		pty_to_stdout((*process)->fd);
 	remove_queue_item(process, head);
 	status = 0;
 	return status;
