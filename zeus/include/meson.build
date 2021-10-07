@@ -9,6 +9,8 @@ conf.set('USE_COLORS', true)
 if buildtype == 'debug' or buildtype == 'debugoptimized'
     conf.set('DEBUG', true)
     conf.set('PRINT_ERROR_MSG_ON_SCREEN', true)
+    init_directory = pj_root + 'tests/fake_etc/init.d/'
+    conf.set('INIT_DIRECTORY', init_directory)
 	conf.set('rcx_directory', pj_root + 'tests/fake_etc/rcX.d')
 	conf.set('run_directory', pj_root + 'tests/run')
 	conf.set('caos_config_directory', pj_root + 'tests/fake_etc/caos/init/')
@@ -17,6 +19,8 @@ if buildtype == 'debug' or buildtype == 'debugoptimized'
 else
     conf.set('DEBUG', false)
     conf.set('PRINT_ERROR_MSG_ON_SCREEN', false)
+    init_directory = '/etc/init.d/'
+    conf.set('INIT_DIRECTORY', init_directory)
 	conf.set('rcx_directory', '/etc/rcX.d')
 	conf.set('run_directory', '/run')
 	conf.set('caos_config_directory', '/etc/caos/init/')

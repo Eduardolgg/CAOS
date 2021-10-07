@@ -33,6 +33,7 @@
 #include <pty.h>
 #include <utmp.h>
 
+#include "config.h"
 #include "log.h"
 #include "filesystem.h"
 #include "processes.h"
@@ -49,15 +50,21 @@ int is_virtual_terminal_available()
 	return stat("/dev/pts", &s) != -1 && stat("/dev/ptmx", &s) != -1;
 }
 
+#include <limits.h>
 static
 void exec_script(char *script_name)
 {
+	char path[256] = INIT_DIRECTORY;
+
+	strcat(path, script_name + 3);
+
+	print_dbg_msg("Running script: %s\n", path);
 	switch (script_name[0]) {
 	case 'S':
-		execl(script_name, script_name, START, NULL);
+		execl(path, path, START, NULL);
 		break;
 	case 'K':
-		execl(script_name, script_name, STOP, NULL);
+		execl(path, path, STOP, NULL);
 		break;
 	default:
 		print_err_msg("ERROR: LP, %s is not a start/stop script, it will "

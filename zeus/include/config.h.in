@@ -47,6 +47,8 @@
 // TODO: find meson define exec name
 #define PID_FILES_DIR "@run_directory@/zeus/"
 
+#define INIT_DIRECTORY "@INIT_DIRECTORY@"
+
 /*
  * RC configuration.
  */
